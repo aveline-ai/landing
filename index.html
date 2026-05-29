@@ -3,17 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aveline — A wiki for humans. An API for agents.</title>
+    <title>Aveline — the agent-friendly wiki</title>
     <meta
       name="description"
-      content="An open source wiki for humans, with a typed API for AI agents. Built in public."
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
     />
-    <meta property="og:title" content="Aveline" />
+
+    <!-- Open Graph (Slack, Facebook, LinkedIn, iMessage) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aveline.ai/" />
+    <meta property="og:site_name" content="Aveline" />
+    <meta property="og:title" content="The agent-friendly wiki" />
     <meta
       property="og:description"
-      content="A wiki for humans. An API for agents. Built in public."
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
     />
+    <meta property="og:image" content="https://aveline.ai/og.png" />
+    <meta property="og:image:secure_url" content="https://aveline.ai/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Aveline — the agent-friendly wiki" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The agent-friendly wiki" />
+    <meta
+      name="twitter:description"
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
+    />
+    <meta name="twitter:image" content="https://aveline.ai/og.png" />
+
     <meta name="theme-color" content="#08080a" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/favicon-180.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -261,12 +287,11 @@
         color: rgba(26, 20, 16, 0.78);
       }
 
-      .pane.human .pane-brand::before {
-        content: "";
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #1a1410;
+      .pane.human .pane-brand .mark {
+        width: 26px;
+        height: 26px;
+        display: block;
+        flex: none;
       }
 
       .pane.agent .pane-brand {
@@ -293,6 +318,184 @@
       }
 
       /* ────────────────────────────────────────────────────────────
+         CTA — "TERMINAL & TICKET"
+         Two free-standing buttons centered on the seam with breathing
+         room between them. Each themed to its own world:
+           .try    → warm tactile cream pill (the human/product "ticket")
+           .deploy → dark monospace terminal command chip (the agent dev world)
+      ──────────────────────────────────────────────────────────── */
+
+      .cta {
+        position: fixed;
+        left: 50%;
+        top: 50%; /* line up with the two headlines' vertical center */
+        transform: translate(-50%, -50%);
+        z-index: 6;
+        /* equal halves so the gap between the buttons lands exactly on
+           the page's center seam, no matter the buttons' own widths */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        column-gap: 2.2rem;
+        width: min(880px, 94vw);
+        animation: cta-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+      }
+
+      @keyframes cta-in {
+        from {
+          opacity: 0;
+          transform: translate(-50%, calc(-50% + 16px));
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%);
+        }
+      }
+
+      .cta-btn {
+        position: relative;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: transform 0.22s ease, box-shadow 0.22s ease,
+          background-color 0.22s ease, color 0.22s ease,
+          border-color 0.22s ease;
+      }
+
+      .cta-btn:focus-visible {
+        outline: 2px solid #6ee7b7;
+        outline-offset: 4px;
+      }
+
+      /* ── "Try it" — warm tactile cream pill (the ticket) ──────────── */
+      .cta-btn.try {
+        justify-self: end; /* hug the seam from the left */
+        font-family: "Fraunces", "Inter", serif;
+        font-weight: 500;
+        font-size: 1.42rem;
+        letter-spacing: -0.01em;
+        font-variation-settings: "opsz" 40;
+        gap: 0.7rem;
+        padding: 1.35rem 3.1rem;
+        border-radius: 999px;
+        background: #faf6ec;
+        color: #1a1410;
+        border: 1px solid rgba(26, 20, 16, 0.12);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.9) inset,
+          0 14px 30px -14px rgba(26, 20, 16, 0.55),
+          0 4px 10px rgba(26, 20, 16, 0.14);
+      }
+
+      .cta-btn.try::before {
+        /* gold dot accent — a little handmade ticket punch */
+        content: "";
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: rgba(212, 152, 80, 1);
+        box-shadow: 0 0 0 3px rgba(212, 152, 80, 0.25);
+        transition: transform 0.22s ease;
+      }
+
+      .cta-btn.try:hover {
+        transform: translateY(-3px);
+        background: #fffdf6;
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.95) inset,
+          0 22px 40px -16px rgba(26, 20, 16, 0.6),
+          0 6px 14px rgba(26, 20, 16, 0.2);
+      }
+
+      .cta-btn.try:hover::before {
+        transform: scale(1.25);
+      }
+
+      .cta-btn.try:active {
+        transform: translateY(-1px);
+      }
+
+      /* ── "Deploy it" — dark terminal command chip ────────────────── */
+      .cta-btn.deploy {
+        justify-self: start; /* hug the seam from the right */
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-weight: 500;
+        font-size: 1.18rem;
+        letter-spacing: 0.01em;
+        gap: 0.55rem;
+        padding: 1.28rem 2.3rem;
+        border-radius: 11px;
+        background: #0c0c10;
+        color: #6ee7b7;
+        border: 1px solid rgba(110, 231, 183, 0.28);
+        box-shadow:
+          0 14px 34px -14px rgba(0, 0, 0, 0.7),
+          0 4px 12px rgba(0, 0, 0, 0.3),
+          0 0 0 0 rgba(110, 231, 183, 0);
+      }
+
+      .cta-btn.deploy::before {
+        /* terminal prompt prefix */
+        content: "›";
+        color: rgba(110, 231, 183, 0.65);
+        font-weight: 600;
+        margin-right: 0.1rem;
+      }
+
+      .cta-btn.deploy .arrow {
+        color: #6ee7b7;
+        margin-left: 0.15rem;
+        transition: transform 0.22s ease;
+      }
+
+      .cta-btn.deploy:hover {
+        transform: translateY(-3px);
+        background: #101018;
+        border-color: rgba(110, 231, 183, 0.55);
+        color: #8ff0c8;
+        box-shadow:
+          0 22px 44px -16px rgba(0, 0, 0, 0.75),
+          0 6px 16px rgba(0, 0, 0, 0.4),
+          0 0 22px -4px rgba(110, 231, 183, 0.4);
+      }
+
+      .cta-btn.deploy:hover .arrow {
+        transform: translate(2px, -2px);
+      }
+
+      .cta-btn.deploy:active {
+        transform: translateY(-1px);
+      }
+
+      /* ────────────────────────────────────────────────────────────
+         Medium screens (tablets / laptops) — panes are still side-by-side,
+         but narrow enough that two buttons on the seam would crowd the
+         headlines. Keep the CTA fixed and centered on the seam, but stack
+         the buttons vertically and sit them in the lower-center, clear of
+         the headlines.
+      ──────────────────────────────────────────────────────────── */
+
+      @media (min-width: 721px) and (max-width: 1900px) {
+        .cta {
+          top: auto;
+          bottom: 7vh;
+          transform: translateX(-50%);
+          animation: none;
+          width: auto;
+          grid-template-columns: minmax(0, 300px);
+          justify-content: center;
+          column-gap: 0;
+          row-gap: 0.85rem;
+        }
+        .cta-btn {
+          justify-self: stretch;
+        }
+      }
+
+      /* ────────────────────────────────────────────────────────────
          Mobile — stack vertically
       ──────────────────────────────────────────────────────────── */
 
@@ -314,6 +517,20 @@
           min-height: 50vh;
           min-height: 50dvh;
           padding: 4rem 1.5rem;
+          /* stack as a column so content left-aligns to the padding edge
+             (instead of shrink-wrapping and centering) — shares a left
+             edge with the CTA buttons below */
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        /* content fills the column and left-aligns, capped to a tidy
+           measure that matches the CTA column width */
+        .pane.human .content,
+        .pane.agent .content {
+          width: 100%;
+          max-width: 30rem;
+          margin: 0;
         }
 
         .pane-brand {
@@ -356,6 +573,54 @@
           display: none;
           content: none;
         }
+
+        /* On mobile the CTA leaves fixed positioning and flows in the
+           normal document order — between the two stacked panes — as a
+           warm band that continues the human side. So it never overlaps
+           pane content, and the two headlines hug it from above/below. */
+        .pane.human {
+          justify-content: flex-end;
+          padding-bottom: 1.5rem;
+        }
+        /* Agent label hugs the CTA band from below, mirroring "For humans"
+           above it. The headline is dropped on mobile (it just repeats the
+           human one) — leaving the label sitting in the trippy matrix bg. */
+        .pane.agent {
+          justify-content: flex-start;
+          padding-top: 1.5rem;
+        }
+        .pane.agent h1 {
+          display: none;
+        }
+
+        .cta {
+          position: static;
+          transform: none;
+          animation: none;
+          width: 100%;
+          /* same 30rem max column as the content, left-aligned, so the
+             buttons share a left edge with the headline above */
+          grid-template-columns: minmax(0, 30rem);
+          justify-content: start;
+          align-items: stretch;
+          column-gap: 0;
+          row-gap: 0.85rem;
+          padding: 2rem 1.5rem 2.4rem;
+          background: #efe8d6;
+        }
+
+        .cta-btn {
+          width: 100%;
+          justify-self: stretch;
+        }
+
+        .cta-btn.try {
+          padding: 1.05rem 1.5rem;
+        }
+
+        .cta-btn.deploy {
+          padding: 1.05rem 1.5rem;
+        }
       }
     </style>
   </head>
@@ -364,12 +629,41 @@
       <!-- LEFT: human / wiki -->
       <section class="pane human">
         <canvas class="canvas-organic"></canvas>
-        <div class="pane-brand">Aveline</div>
+        <div class="pane-brand">
+          <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+            <defs>
+              <clipPath id="brandMark">
+                <rect x="1" y="1" width="30" height="30" rx="7.5" />
+              </clipPath>
+            </defs>
+            <g clip-path="url(#brandMark)">
+              <rect x="0" y="0" width="16" height="32" fill="#ffffff" />
+              <rect x="16" y="0" width="16" height="32" fill="#08080a" />
+              <rect x="15.4" y="0" width="1.2" height="32" fill="#6ee7b7" opacity="0.9" />
+              <circle cx="8.4" cy="16" r="3.4" fill="#1a1410" />
+              <rect x="22" y="9.5" width="3.4" height="13" rx="1.7" fill="#6ee7b7" />
+            </g>
+            <rect x="1" y="1" width="30" height="30" rx="7.5" fill="none" stroke="#1a1410" stroke-opacity="0.55" stroke-width="1.5" />
+          </svg>
+          Aveline
+        </div>
         <div class="content">
           <div class="pane-label">For humans</div>
           <h1>A wiki <span class="you">you</span> can<br />easily understand.</h1>
         </div>
       </section>
+
+      <!-- CTA: terminal & ticket pair. On desktop it's position:fixed and
+           centered on the seam (lifted out of the grid, so the panes still
+           form two columns). On mobile it drops into normal flow here,
+           between the stacked panes — no overlap with pane content.
+             .try    → app  ·  .deploy → GitHub repo -->
+      <nav class="cta" aria-label="Get started">
+        <a class="cta-btn try" href="https://app.aveline.ai">Try it</a>
+        <a class="cta-btn deploy" href="https://github.com/aveline-ai/aveline" target="_blank" rel="noopener">
+          Deploy it<span class="arrow" aria-hidden="true">↗</span>
+        </a>
+      </nav>
 
       <!-- RIGHT: agent / api -->
       <section class="pane agent">
@@ -384,7 +678,7 @@
         </a>
         <div class="content">
           <div class="pane-label">For agents</div>
-          <h1>A wiki <span class="you">you</span> can<br />easily understand.</h1>
+          <h1>A wiki <span class="you">it</span> can<br />easily understand.</h1>
         </div>
       </section>
     </div>
