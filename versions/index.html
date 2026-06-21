@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aveline landing — design directions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg: #08080a;
+        --card: #0f0f12;
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #e8e8ea;
+        --muted: rgba(232, 232, 234, 0.55);
+        --accent: #3b82f6;
+        --accent-hi: #4f8ef7;
+      }
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        padding: clamp(2rem, 5vw, 4.5rem) clamp(1.25rem, 4vw, 3.5rem) 5rem;
+      }
+      .head {
+        max-width: 1400px;
+        margin: 0 auto 2.8rem;
+      }
+      .kicker {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1.1rem;
+      }
+      .kicker::before {
+        content: "";
+        width: 26px;
+        height: 1.5px;
+        background: var(--accent);
+      }
+      h1 {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        letter-spacing: -0.025em;
+        line-height: 1.05;
+        margin-bottom: 0.9rem;
+      }
+      .head p {
+        color: var(--muted);
+        max-width: 60ch;
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+      .head code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85em;
+        color: var(--accent-hi);
+        background: rgba(59, 130, 246, 0.1);
+        padding: 0.1em 0.4em;
+        border-radius: 5px;
+      }
+      .grid {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: clamp(1.4rem, 2.5vw, 2.2rem);
+      }
+      .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+          border-color 0.25s, box-shadow 0.25s;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 26px 50px -24px rgba(0, 0, 0, 0.75),
+          0 0 0 1px rgba(59, 130, 246, 0.2);
+      }
+      .shot {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        background: #050507;
+        border-bottom: 1px solid var(--line);
+      }
+      /* a scaled live preview of each page */
+      .shot iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1440px;
+        height: 900px;
+        border: 0;
+        transform: scale(0.333);
+        transform-origin: top left;
+        pointer-events: none;
+      }
+      .shot .num {
+        position: absolute;
+        top: 0.8rem;
+        left: 0.9rem;
+        z-index: 2;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        color: #fff;
+        background: rgba(8, 8, 10, 0.7);
+        backdrop-filter: blur(6px);
+        padding: 0.3rem 0.6rem;
+        border-radius: 7px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .shot .open {
+        position: absolute;
+        bottom: 0.8rem;
+        right: 0.9rem;
+        z-index: 2;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--accent-hi);
+        background: rgba(8, 8, 10, 0.7);
+        backdrop-filter: blur(6px);
+        padding: 0.35rem 0.7rem;
+        border-radius: 7px;
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.25s, transform 0.25s;
+      }
+      .card:hover .open {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .meta {
+        padding: 1.3rem 1.4rem 1.5rem;
+      }
+      .meta h2 {
+        font-family: "Fraunces", serif;
+        font-weight: 600;
+        font-size: 1.4rem;
+        letter-spacing: -0.015em;
+        margin-bottom: 0.5rem;
+      }
+      .meta .tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.7rem;
+        display: block;
+      }
+      .meta p {
+        color: var(--muted);
+        font-size: 0.93rem;
+        line-height: 1.55;
+      }
+      .note {
+        max-width: 1400px;
+        margin: 3rem auto 0;
+        padding-top: 1.6rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .note b { color: var(--text); font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <span class="kicker">Aveline · landing directions</span>
+      <h1>Six takes on the same idea.</h1>
+      <p>
+        Each is a complete, self-contained page telling the same story — an
+        open-source, agent-friendly wiki — in a different voice. Click any
+        card to open it full-screen. The previews below are live (scaled), so
+        animations run. <code>01</code> extends your current split design;
+        the rest are fresh directions.
+      </p>
+    </div>
+
+    <div class="grid">
+      <a class="card" href="01-split-worlds.html">
+        <div class="shot">
+          <span class="num">01</span><span class="open">open ↗</span>
+          <iframe src="01-split-worlds.html" loading="lazy" tabindex="-1" title="Split Worlds preview"></iframe>
+        </div>
+        <div class="meta">
+          <span class="tag">warm · editorial · dual</span>
+          <h2>Split Worlds</h2>
+          <p>
+            Your current human/agent split, grown into a scroll story —
+            warm parchment and dark matrix bands stitched by the blue seam.
+            The safe, on-brand evolution.
+          </p>
+        </div>
+      </a>
+
+      <a class="card" href="02-terminal.html">
+        <div class="shot">
+          <span class="num">02</span><span class="open">open ↗</span>
+          <iframe src="02-terminal.html" loading="lazy" tabindex="-1" title="Terminal preview"></iframe>
+        </div>
+        <div class="meta">
+          <span class="tag">dark · monospace · dev-native</span>
+          <h2>Terminal</h2>
+          <p>
+            The whole page as one beautiful terminal session. Commands type
+            out the pitch as you scroll, with real-feeling <code>aveline</code>
+            CLI output. Pure open-source dev energy.
+          </p>
+        </div>
+      </a>
+
+      <a class="card" href="03-editorial.html">
+        <div class="shot">
+          <span class="num">03</span><span class="open">open ↗</span>
+          <iframe src="03-editorial.html" loading="lazy" tabindex="-1" title="Editorial preview"></iframe>
+        </div>
+        <div class="meta">
+          <span class="tag">paper · literary · human</span>
+          <h2>Editorial Manifesto</h2>
+          <p>
+            A typeset broadside — "On wikis that don't rot." Drop cap,
+            chapters, marginalia, pull quotes, a signature. The most
+            unmistakably human-made of the set.
+          </p>
+        </div>
+      </a>
+
+      <a class="card" href="04-graph.html">
+        <div class="shot">
+          <span class="num">04</span><span class="open">open ↗</span>
+          <iframe src="04-graph.html" loading="lazy" tabindex="-1" title="Knowledge graph preview"></iframe>
+        </div>
+        <div class="meta">
+          <span class="tag">dark · animated · techy</span>
+          <h2>Living Knowledge Graph</h2>
+          <p>
+            A drifting canvas graph of connected knowledge items as the hero
+            — pinned rings, glowing links, a solo→team cluster that grows.
+            Futuristic but legible.
+          </p>
+        </div>
+      </a>
+
+      <a class="card" href="05-brutalist.html">
+        <div class="shot">
+          <span class="num">05</span><span class="open">open ↗</span>
+          <iframe src="05-brutalist.html" loading="lazy" tabindex="-1" title="Brutalist preview"></iframe>
+        </div>
+        <div class="meta">
+          <span class="tag">paper · bold · swiss-grid</span>
+          <h2>Brutalist</h2>
+          <p>
+            High-contrast and confident — massive type, hard rules, a ticker,
+            color-inverting hovers, a raw spec table. Opinionated, on-trend
+            for cool dev tools.
+          </p>
+        </div>
+      </a>
+
+      <a class="card" href="06-spotlight.html">
+        <div class="shot">
+          <span class="num">06</span><span class="open">open ↗</span>
+          <iframe src="06-spotlight.html" loading="lazy" tabindex="-1" title="Spotlight preview"></iframe>
+        </div>
+        <div class="meta">
+          <span class="tag">dark · glassy · premium</span>
+          <h2>Product Spotlight</h2>
+          <p>
+            Linear/Vercel-class polish, built around a pure-CSS mockup of the
+            real Aveline app — pinned items, owners, a flagged fact, a thread.
+            The sleek startup launch.
+          </p>
+        </div>
+      </a>
+    </div>
+
+    <div class="note">
+      <p>
+        <b>Notes for review:</b> all six use the same brand blue (#3B82F6),
+        the same fonts, and the same plain, no-buzzword copy. None are
+        deployed — the live <code>index.html</code> is untouched. Tell me
+        which direction you like (or mix elements) and I'll polish it and ship
+        it.
+      </p>
+    </div>
+  </body>
+</html>

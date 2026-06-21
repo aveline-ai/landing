@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aveline — Notion, built for AI agents</title>
+    <meta
+      name="description"
+      content="Aveline is an open-source, agent-friendly knowledge layer. Agents read and write it as a side effect of normal work — with provenance, ownership, and decay built in."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aveline.ai/" />
+    <meta property="og:site_name" content="Aveline" />
+    <meta property="og:title" content="Notion, built for AI agents" />
+    <meta
+      property="og:description"
+      content="An open-source knowledge layer that agents read and write as a side effect of normal work."
+    />
+    <meta property="og:image" content="https://aveline.ai/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#08080a" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #08080a;
+        --bg-window: #0c0c10;
+        --bg-titlebar: #14141a;
+        --line: #1d1d26;
+        --line-soft: #16161d;
+        --text: #d7d7df;
+        --muted: #7d7d8a;
+        --dim: #565663;
+        --blue: #4f8ef7;
+        --blue-bright: #6ea4ff;
+        --gold: #d49850;
+        --green: #5ec98a;
+        --red: #f0726b;
+        --mauve: #b18cf0;
+        --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+        --serif: "Fraunces", Georgia, serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background: var(--bg);
+      }
+
+      body {
+        font-family: var(--mono);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        font-size: 15px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+        /* faint scanlines + vignette over the whole page */
+        background-image:
+          radial-gradient(
+            ellipse 120% 80% at 50% 0%,
+            rgba(79, 142, 247, 0.07),
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.012) 0px,
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px,
+            transparent 3px
+          );
+      }
+
+      ::selection {
+        background: rgba(79, 142, 247, 0.3);
+        color: #fff;
+      }
+
+      a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+
+      /* ───────────────────────── layout shell ───────────────────────── */
+
+      .wrap {
+        max-width: 940px;
+        margin: 0 auto;
+        padding: clamp(1rem, 4vw, 3rem) clamp(0.75rem, 3vw, 2rem) 5rem;
+      }
+
+      /* ───────────────────────── terminal window ───────────────────────── */
+
+      .window {
+        background: var(--bg-window);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow:
+          0 0 0 1px rgba(0, 0, 0, 0.4),
+          0 40px 80px -30px rgba(0, 0, 0, 0.9),
+          0 10px 30px -10px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+      }
+
+      .titlebar {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.7rem 1rem;
+        background: linear-gradient(180deg, #16161d, #101016);
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        backdrop-filter: blur(6px);
+      }
+
+      .dots {
+        display: flex;
+        gap: 0.5rem;
+        flex: none;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #2a2a33;
+      }
+      .dot.r {
+        background: #f0726b;
+      }
+      .dot.y {
+        background: #f2c14e;
+      }
+      .dot.g {
+        background: #5ec98a;
+      }
+
+      .titlebar .title {
+        flex: 1;
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--muted);
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .titlebar .title b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .titlebar .badge {
+        flex: none;
+        font-size: 0.68rem;
+        color: var(--dim);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 0.12rem 0.45rem;
+      }
+
+      .screen {
+        padding: clamp(1rem, 3.5vw, 2.4rem) clamp(0.9rem, 3.5vw, 2.6rem);
+      }
+
+      /* ───────────────────────── prompt + commands ───────────────────────── */
+
+      .block {
+        margin: 0 0 2.6rem;
+      }
+
+      .prompt {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.45rem;
+        font-size: clamp(0.92rem, 2.4vw, 1.05rem);
+        margin-bottom: 0.9rem;
+      }
+      .prompt .ps1 {
+        color: var(--green);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .prompt .ps1 .path {
+        color: var(--blue);
+      }
+      .prompt .ps1 .sigil {
+        color: var(--muted);
+      }
+      .cmd {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .cmd .verb {
+        color: var(--blue-bright);
+        font-weight: 600;
+      }
+      .cmd .flag {
+        color: var(--gold);
+      }
+      .cmd .str {
+        color: var(--green);
+      }
+      .cmd .slug {
+        color: var(--mauve);
+      }
+
+      /* steady caret that trails a command while it "types" */
+      .caret {
+        display: inline-block;
+        width: 0.6em;
+        height: 1.05em;
+        background: var(--blue);
+        transform: translateY(0.18em);
+        margin-left: 0.1em;
+        animation: blink 1.05s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .prompt.done .caret {
+        display: none;
+      }
+
+      /* output area — fades / slides in line by line */
+      .output {
+        color: var(--muted);
+        padding-left: clamp(0rem, 2vw, 1.4rem);
+      }
+      .output .line {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      .reveal .output .line,
+      .no-anim .output .line {
+        animation: lineIn 0.42s ease forwards;
+      }
+      @keyframes lineIn {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* generic text styling inside outputs */
+      .output strong,
+      .output b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .output em {
+        color: var(--gold);
+        font-style: normal;
+      }
+      .output .kw {
+        color: var(--blue);
+      }
+      .output .ok {
+        color: var(--green);
+      }
+      .output .warn {
+        color: var(--gold);
+      }
+      .output .err {
+        color: var(--red);
+      }
+      .output .comment {
+        color: var(--dim);
+      }
+
+      /* ───────────────────────── hero banner (ascii) ───────────────────────── */
+
+      .banner {
+        color: var(--blue);
+        font-size: clamp(0.55rem, 2.1vw, 0.95rem);
+        line-height: 1.15;
+        white-space: pre;
+        overflow-x: auto;
+        margin-bottom: 1.4rem;
+        text-shadow: 0 0 22px rgba(79, 142, 247, 0.35);
+      }
+      .tagline {
+        font-family: var(--serif);
+        font-size: clamp(1.5rem, 5vw, 2.7rem);
+        line-height: 1.12;
+        color: #f2f2f5;
+        letter-spacing: -0.015em;
+        margin: 0.4rem 0 0.6rem;
+        max-width: 22ch;
+      }
+      .tagline .accent {
+        color: var(--blue);
+        font-style: italic;
+      }
+      .subtag {
+        color: var(--muted);
+        max-width: 56ch;
+        font-size: 0.95rem;
+      }
+      .subtag .gold {
+        color: var(--gold);
+      }
+
+      /* ───────────────────────── box-drawing panels ───────────────────────── */
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.012);
+        margin: 0.4rem 0 1rem;
+        overflow: hidden;
+      }
+      .panel-head {
+        padding: 0.5rem 0.95rem;
+        border-bottom: 1px solid var(--line-soft);
+        color: var(--dim);
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .panel-body {
+        padding: 0.85rem 0.95rem;
+        color: var(--text);
+        line-height: 1.7;
+      }
+      .panel-body p {
+        color: var(--muted);
+      }
+      .panel-body p + p {
+        margin-top: 0.7rem;
+      }
+
+      /* "why" — three reasoned beats as connected box rows */
+      .beats {
+        display: grid;
+        gap: 0.9rem;
+        margin-top: 0.4rem;
+      }
+      .beat {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.95rem 1.1rem;
+        background: rgba(255, 255, 255, 0.012);
+        transition: border-color 0.25s, background 0.25s;
+      }
+      .beat:hover {
+        border-color: rgba(79, 142, 247, 0.45);
+        background: rgba(79, 142, 247, 0.04);
+      }
+      .beat .key {
+        color: var(--blue);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .beat .val strong {
+        color: #f2f2f5;
+        display: block;
+        margin-bottom: 0.2rem;
+        font-size: 1.02rem;
+      }
+      .beat .val span {
+        color: var(--muted);
+      }
+
+      /* ───────────────────────── aveline list (table) ───────────────────────── */
+
+      .table-scroll {
+        overflow-x: auto;
+        margin: 0.3rem 0 0.6rem;
+      }
+      table.tui {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.86rem;
+        min-width: 560px;
+      }
+      table.tui th {
+        text-align: left;
+        color: var(--dim);
+        font-weight: 600;
+        padding: 0.4rem 0.9rem 0.55rem 0;
+        border-bottom: 1px solid var(--line);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+      }
+      table.tui td {
+        padding: 0.5rem 0.9rem 0.5rem 0;
+        border-bottom: 1px solid var(--line-soft);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      table.tui tr:last-child td {
+        border-bottom: none;
+      }
+      table.tui tr:hover td {
+        color: var(--text);
+        background: rgba(79, 142, 247, 0.03);
+      }
+      table.tui td.slug {
+        color: var(--mauve);
+        font-weight: 500;
+      }
+      table.tui td.owner {
+        color: var(--text);
+      }
+
+      .tag {
+        display: inline-block;
+        font-size: 0.72rem;
+        padding: 0.05rem 0.45rem;
+        border-radius: 4px;
+        border: 1px solid currentColor;
+        letter-spacing: 0.02em;
+      }
+      .tag.pin {
+        color: var(--gold);
+      }
+      .tag.active {
+        color: var(--green);
+      }
+      .tag.flagged {
+        color: var(--red);
+      }
+      .tag.retired {
+        color: var(--dim);
+      }
+      .pin-mark {
+        color: var(--gold);
+      }
+      .dash {
+        color: var(--dim);
+      }
+      .list-footer {
+        color: var(--dim);
+        font-size: 0.8rem;
+        margin-top: 0.2rem;
+      }
+
+      /* ───────────────────────── aveline get (markdown doc) ───────────────────────── */
+
+      .doc {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .doc-head {
+        background: rgba(79, 142, 247, 0.05);
+        border-bottom: 1px solid var(--line);
+        padding: 0.75rem 1.1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .doc-head .h1 {
+        color: #f2f2f5;
+        font-weight: 600;
+        font-size: 1.02rem;
+      }
+      .doc-head .h1::before {
+        content: "# ";
+        color: var(--blue);
+      }
+      .doc-body {
+        padding: 1.1rem 1.3rem;
+      }
+      .doc-body .md-h {
+        color: var(--blue-bright);
+        font-weight: 600;
+        margin: 1.1rem 0 0.4rem;
+      }
+      .doc-body .md-h:first-child {
+        margin-top: 0;
+      }
+      .doc-body .md-h::before {
+        content: "## ";
+        color: var(--dim);
+      }
+      .doc-body p,
+      .doc-body li {
+        color: var(--muted);
+      }
+      .doc-body ul {
+        list-style: none;
+        margin: 0.3rem 0;
+      }
+      .doc-body li {
+        position: relative;
+        padding-left: 1.3rem;
+      }
+      .doc-body li::before {
+        content: "-";
+        position: absolute;
+        left: 0.3rem;
+        color: var(--blue);
+      }
+      .doc-body code {
+        color: var(--gold);
+        background: rgba(212, 152, 80, 0.08);
+        padding: 0.05em 0.35em;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      .doc-foot {
+        border-top: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.015);
+        padding: 0.7rem 1.1rem;
+        font-size: 0.78rem;
+        color: var(--dim);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.4rem;
+      }
+      .doc-foot b {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .doc-foot .ok {
+        color: var(--green);
+      }
+
+      /* ───────────────────────── how: piped flow ───────────────────────── */
+
+      .flow {
+        display: grid;
+        gap: 0.55rem;
+        margin: 0.2rem 0;
+      }
+      .flow .step {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: baseline;
+        gap: 0.8rem;
+      }
+      .flow .pipe {
+        color: var(--blue);
+        font-weight: 600;
+      }
+      .flow .step strong {
+        color: var(--text);
+      }
+      .flow .step span {
+        color: var(--muted);
+      }
+
+      /* ───────────────────────── CTA ───────────────────────── */
+
+      .cta-block {
+        margin-top: 1rem;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-top: 1rem;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-family: var(--mono);
+        font-size: 1rem;
+        font-weight: 500;
+        padding: 0.85rem 1.4rem;
+        border-radius: 9px;
+        border: 1px solid var(--line);
+        background: #101016;
+        transition: transform 0.2s ease, border-color 0.2s ease,
+          box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+      }
+      .chip::before {
+        content: "$";
+        color: var(--green);
+        font-weight: 700;
+      }
+      .chip .arrow {
+        color: var(--dim);
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+      .chip.primary {
+        color: #eef4ff;
+        border-color: rgba(79, 142, 247, 0.45);
+        background: linear-gradient(
+          180deg,
+          rgba(79, 142, 247, 0.16),
+          rgba(79, 142, 247, 0.06)
+        );
+      }
+      .chip.primary:hover {
+        transform: translateY(-3px);
+        border-color: rgba(79, 142, 247, 0.8);
+        box-shadow: 0 16px 34px -14px rgba(79, 142, 247, 0.55),
+          0 0 22px -6px rgba(79, 142, 247, 0.5);
+      }
+      .chip.primary:hover .arrow {
+        color: var(--blue-bright);
+        transform: translateX(3px);
+      }
+      .chip.ghost {
+        color: var(--text);
+      }
+      .chip.ghost:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.28);
+        color: #fff;
+      }
+      .chip.ghost:hover .arrow {
+        color: var(--text);
+        transform: translate(2px, -2px);
+      }
+      .chip:focus-visible {
+        outline: 2px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      .closing {
+        margin-top: 2.2rem;
+        text-align: center;
+        color: var(--dim);
+        font-size: 0.82rem;
+      }
+      .closing a {
+        color: var(--muted);
+      }
+      .closing a:hover {
+        color: var(--blue);
+      }
+      .closing .lic {
+        color: var(--dim);
+      }
+
+      /* persistent live prompt at the very bottom */
+      .live-prompt {
+        margin-top: 1.6rem;
+        display: flex;
+        gap: 0.45rem;
+        align-items: baseline;
+        font-size: 1.02rem;
+      }
+
+      /* skip hint */
+      .skip {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 60;
+        font-size: 0.74rem;
+        color: var(--dim);
+        background: rgba(12, 12, 16, 0.85);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0.35rem 0.7rem;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+        transition: color 0.2s, border-color 0.2s, opacity 0.3s;
+      }
+      .skip:hover {
+        color: var(--text);
+        border-color: var(--blue);
+      }
+      .skip[hidden] {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          font-size: 14px;
+        }
+        .output {
+          padding-left: 0.6rem;
+        }
+        .beat {
+          grid-template-columns: 1fr;
+          gap: 0.3rem;
+        }
+        .flow .step {
+          grid-template-columns: 1fr;
+          gap: 0.1rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        .caret {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="window">
+        <div class="titlebar">
+          <div class="dots">
+            <span class="dot r"></span>
+            <span class="dot y"></span>
+            <span class="dot g"></span>
+          </div>
+          <div class="title">
+            <b>aveline</b> — ~/workspace
+          </div>
+          <span class="badge">v0 · open source</span>
+        </div>
+
+        <div class="screen" id="screen">
+          <!-- ───────────── HERO ───────────── -->
+          <section class="block" data-block>
+            <div class="prompt" data-prompt>
+              <span class="ps1"
+                ><span class="path">aveline</span>
+                <span class="sigil">~ $</span></span
+              >
+              <span class="cmd" data-cmd
+                ><span class="verb">aveline</span> init</span
+              ><span class="caret"></span>
+            </div>
+            <div class="output" data-output>
+              <div class="line">
+<pre class="banner" aria-label="Aveline">  ___     _____ _    ___ _  _ ___
+ /_\ \   / / __| |  |_ _| \| | __|
+/ _ \ \ / /| _|| |__ | || .` | _|
+/_/ \_\_/  |___|____|___|_|\_|___|
+</pre>
+              </div>
+              <div class="line">
+                <h1 class="tagline">
+                  Notion, built for <span class="accent">AI&nbsp;agents</span>.
+                </h1>
+              </div>
+              <div class="line">
+                <p class="subtag">
+                  A shared knowledge layer for small teams whose work already
+                  runs through agents. Captured
+                  <span class="gold">as a side effect of normal work</span> —
+                  with provenance, ownership, and decay built in.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───────────── WHY ───────────── -->
+          <section class="block" data-block>
+            <div class="prompt" data-prompt>
+              <span class="ps1"
+                ><span class="path">aveline</span>
+                <span class="sigil">~ $</span></span
+              >
+              <span class="cmd" data-cmd
+                ><span class="verb">aveline</span> why</span
+              ><span class="caret"></span>
+            </div>
+            <div class="output" data-output>
+              <div class="line">
+                <p>
+                  <span class="comment"># wikis fail because humans don't maintain them.</span>
+                </p>
+              </div>
+              <div class="line">
+                <p>
+                  The killer move isn't a better wiki UI. It's that
+                  <strong>agents are the primary writers and readers</strong> —
+                  the human web UI is the secondary, inspection surface.
+                </p>
+              </div>
+              <div class="line">
+                <div class="beats">
+                  <div class="beat">
+                    <span class="key">[provenance]</span>
+                    <span class="val"
+                      ><strong>Every fact knows where it came from.</strong>
+                      <span
+                        >Owner, version history, the conversation that wrote
+                        it. Append-only edits, wiki-style.</span
+                      ></span
+                    >
+                  </div>
+                  <div class="beat">
+                    <span class="key">[decay]</span>
+                    <span class="val"
+                      ><strong>Stale facts get flagged, not buried.</strong>
+                      <span
+                        >Anyone — including an agent that just got burned — can
+                        flag a fact wrong. The owner resolves.</span
+                      ></span
+                    >
+                  </div>
+                  <div class="beat">
+                    <span class="key">[solo-first]</span>
+                    <span class="val"
+                      ><strong>Useful for one before it's useful for many.</strong>
+                      <span
+                        >Claude's working memory, persisted across sessions.
+                        Invite a teammate when it earns the trust.</span
+                      ></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───────────── HOW ───────────── -->
+          <section class="block" data-block>
+            <div class="prompt" data-prompt>
+              <span class="ps1"
+                ><span class="path">aveline</span>
+                <span class="sigil">~ $</span></span
+              >
+              <span class="cmd" data-cmd
+                ><span class="verb">aveline</span> how</span
+              ><span class="caret"></span>
+            </div>
+            <div class="output" data-output>
+              <div class="line">
+                <p>
+                  <span class="comment"># the loop, end to end:</span>
+                </p>
+              </div>
+              <div class="line">
+                <div class="flow">
+                  <div class="step">
+                    <span class="pipe">1 │</span>
+                    <span
+                      ><strong>Agent works.</strong> Claude solves a problem,
+                      learns a fact, ships a runbook.</span
+                    >
+                  </div>
+                  <div class="step">
+                    <span class="pipe">2 │</span>
+                    <span
+                      ><strong>It writes via the CLI.</strong>
+                      <code class="kw">aveline save</code> captures the
+                      knowledge as a markdown item — owner, status, sources.</span
+                    >
+                  </div>
+                  <div class="step">
+                    <span class="pipe">3 │</span>
+                    <span
+                      ><strong>A human pins what matters.</strong> Pinning
+                      <em>is</em> the editorial review — it elevates a working
+                      note to durable, key context.</span
+                    >
+                  </div>
+                  <div class="step">
+                    <span class="pipe">4 │</span>
+                    <span
+                      ><strong>Pinned items auto-load.</strong> Next session,
+                      they're already in the agent's working memory. No
+                      re-explaining.</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="line">
+                <p>
+                  <span class="comment"
+                    ># the CLI (`aveline`) is for agents · the web UI is for
+                    humans browsing "where things stand"</span
+                  >
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───────────── aveline list ───────────── -->
+          <section class="block" data-block>
+            <div class="prompt" data-prompt>
+              <span class="ps1"
+                ><span class="path">aveline</span>
+                <span class="sigil">~ $</span></span
+              >
+              <span class="cmd" data-cmd
+                ><span class="verb">aveline</span> list
+                <span class="flag">--workspace</span>
+                <span class="str">aveline-pod</span></span
+              ><span class="caret"></span>
+            </div>
+            <div class="output" data-output>
+              <div class="line">
+                <div class="table-scroll">
+                  <table class="tui">
+                    <thead>
+                      <tr>
+                        <th>&nbsp;</th>
+                        <th>SLUG</th>
+                        <th>TITLE</th>
+                        <th>OWNER</th>
+                        <th>STATUS</th>
+                        <th>UPDATED</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="pin-mark" title="pinned">★</span></td>
+                        <td class="slug">deploy-runbook</td>
+                        <td>Prod deploy &amp; rollback</td>
+                        <td class="owner">@arie</td>
+                        <td><span class="tag active">active</span></td>
+                        <td>2d ago</td>
+                      </tr>
+                      <tr>
+                        <td><span class="pin-mark" title="pinned">★</span></td>
+                        <td class="slug">oncall-rotation</td>
+                        <td>Who owns what, when</td>
+                        <td class="owner">@trevor</td>
+                        <td><span class="tag active">active</span></td>
+                        <td>6h ago</td>
+                      </tr>
+                      <tr>
+                        <td><span class="dash">·</span></td>
+                        <td class="slug">auth-flow</td>
+                        <td>Bearer-token request path</td>
+                        <td class="owner">@arie</td>
+                        <td><span class="tag flagged">flagged</span></td>
+                        <td>5d ago</td>
+                      </tr>
+                      <tr>
+                        <td><span class="pin-mark" title="pinned">★</span></td>
+                        <td class="slug">db-conventions</td>
+                        <td>Soft-delete &amp; query rules</td>
+                        <td class="owner">@trevor</td>
+                        <td><span class="tag active">active</span></td>
+                        <td>1d ago</td>
+                      </tr>
+                      <tr>
+                        <td><span class="dash">·</span></td>
+                        <td class="slug">stripe-webhooks</td>
+                        <td>Old idempotency notes</td>
+                        <td class="owner">@arie</td>
+                        <td><span class="tag retired">retired</span></td>
+                        <td>3w ago</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="line">
+                <p class="list-footer">
+                  <span class="pin-mark">★</span> = pinned (auto-loaded into
+                  Claude) &nbsp;·&nbsp; 5 items &nbsp;·&nbsp;
+                  <span class="ok">3 active</span> ·
+                  <span class="warn">1 flagged</span> · 1 retired
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───────────── aveline get ───────────── -->
+          <section class="block" data-block>
+            <div class="prompt" data-prompt>
+              <span class="ps1"
+                ><span class="path">aveline</span>
+                <span class="sigil">~ $</span></span
+              >
+              <span class="cmd" data-cmd
+                ><span class="verb">aveline</span> get
+                <span class="slug">deploy-runbook</span></span
+              ><span class="caret"></span>
+            </div>
+            <div class="output" data-output>
+              <div class="line">
+                <article class="doc">
+                  <div class="doc-head">
+                    <span class="h1">deploy-runbook</span>
+                    <span class="tag pin">pinned</span>
+                    <span class="tag active">active</span>
+                  </div>
+                  <div class="doc-body">
+                    <div class="md-h">Prerequisites</div>
+                    <ul>
+                      <li>
+                        <code>fly</code> CLI authed; you're on the
+                        <code>aveline</code> org.
+                      </li>
+                      <li>
+                        Green CI on <code>main</code>. Never deploy a red
+                        build.
+                      </li>
+                    </ul>
+                    <div class="md-h">Deploy</div>
+                    <ul>
+                      <li>Run <code>fly deploy --strategy rolling</code>.</li>
+                      <li>
+                        Watch <code>/api/heartbeat</code> + Sentry for 5 min.
+                      </li>
+                    </ul>
+                    <div class="md-h">Rollback</div>
+                    <ul>
+                      <li>
+                        <code>fly releases</code> → grab last good version →
+                        <code>fly deploy --image &lt;ref&gt;</code>.
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="doc-foot">
+                    <span><b>owner</b> @arie</span>
+                    <span><b>version</b> v7</span>
+                    <span><b>updated</b> 2d ago · @trevor</span>
+                    <span><b>sources</b> 2 linked</span>
+                    <span class="ok"><b>status</b> ✓ active</span>
+                  </div>
+                </article>
+              </div>
+              <div class="line">
+                <p>
+                  <span class="comment"
+                    ># minimal hidden state — "stale" is a query against
+                    updated_at, not a stored flag. nothing drifts.</span
+                  >
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───────────── CTA ───────────── -->
+          <section class="block cta-block" data-block>
+            <div class="prompt" data-prompt>
+              <span class="ps1"
+                ><span class="path">aveline</span>
+                <span class="sigil">~ $</span></span
+              >
+              <span class="cmd" data-cmd
+                ><span class="verb">aveline</span> start</span
+              ><span class="caret"></span>
+            </div>
+            <div class="output" data-output>
+              <div class="line">
+                <p>
+                  <span class="ok">›</span> Free &amp; open source.
+                  <span class="kw">AGPL</span> backend, <span class="kw">MIT</span>
+                  CLI. Run it yourself or use the hosted app.
+                </p>
+              </div>
+              <div class="line">
+                <div class="chips">
+                  <a class="chip primary" href="https://app.aveline.ai"
+                    >aveline try
+                    <span class="arrow" aria-hidden="true">→</span></a
+                  >
+                  <a
+                    class="chip ghost"
+                    href="https://github.com/aveline-ai/aveline"
+                    target="_blank"
+                    rel="noopener"
+                    >git clone aveline
+                    <span class="arrow" aria-hidden="true">↗</span></a
+                  >
+                </div>
+              </div>
+              <div class="line">
+                <div class="live-prompt">
+                  <span class="ps1"
+                    ><span class="path">aveline</span>
+                    <span class="sigil">~ $</span></span
+                  ><span class="caret" style="display: inline-block"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <p class="closing">
+        Aveline · the agent-friendly wiki ·
+        <a href="https://github.com/aveline-ai" target="_blank" rel="noopener"
+          >github.com/aveline-ai</a
+        >
+        <br /><span class="lic"
+          >a clean read for humans, an API for agents.</span
+        >
+      </p>
+    </div>
+
+    <button class="skip" id="skip" type="button">skip animation ⏎</button>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        var blocks = Array.prototype.slice.call(
+          document.querySelectorAll("[data-block]")
+        );
+        var skipBtn = document.getElementById("skip");
+        var done = false;
+
+        // --- helper: reveal one block's output lines, staggered ---
+        function revealBlock(block) {
+          if (block.dataset.revealed === "1") return;
+          block.dataset.revealed = "1";
+
+          var promptEl = block.querySelector("[data-prompt]");
+          var cmdEl = block.querySelector("[data-cmd]");
+          var output = block.querySelector("[data-output]");
+          var lines = output
+            ? Array.prototype.slice.call(output.querySelectorAll(".line"))
+            : [];
+
+          function showOutput(stagger) {
+            if (promptEl) promptEl.classList.add("done");
+            block.classList.add("reveal");
+            lines.forEach(function (ln, i) {
+              ln.style.animationDelay = stagger ? i * 0.11 + "s" : "0s";
+            });
+          }
+
+          if (reduced || done) {
+            // instant: no typing, everything shown at once
+            showOutput(false);
+            return;
+          }
+
+          // typewriter the command, then reveal output line by line
+          var full = cmdEl ? cmdEl.innerHTML : "";
+          if (!cmdEl) {
+            showOutput(true);
+            return;
+          }
+          // Type character-aware over the rendered text while preserving the
+          // colored spans: we reveal the command by animating a width clip.
+          cmdEl.style.display = "inline-block";
+          cmdEl.style.whiteSpace = "nowrap";
+          cmdEl.style.overflow = "hidden";
+          cmdEl.style.verticalAlign = "bottom";
+          var target = cmdEl.scrollWidth;
+          cmdEl.style.width = "0px";
+          // measure full width without clip artifacts
+          requestAnimationFrame(function () {
+            var w = cmdEl.scrollWidth || target;
+            var dur = Math.min(900, Math.max(280, w * 7));
+            cmdEl.style.transition = "width " + dur + "ms steps(24, end)";
+            cmdEl.style.width = w + "px";
+            setTimeout(function () {
+              cmdEl.style.width = "auto";
+              cmdEl.style.overflow = "visible";
+              showOutput(true);
+            }, dur + 60);
+          });
+        }
+
+        function revealAll() {
+          done = true;
+          blocks.forEach(function (b) {
+            revealBlock(b);
+          });
+          if (skipBtn) skipBtn.setAttribute("hidden", "");
+        }
+
+        if (reduced) {
+          revealAll();
+          if (skipBtn) skipBtn.setAttribute("hidden", "");
+          return;
+        }
+
+        // First block reveals immediately on load (it's above the fold).
+        revealBlock(blocks[0]);
+
+        // Reveal the rest as they scroll into view.
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) {
+                revealBlock(e.target);
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { rootMargin: "0px 0px -18% 0px", threshold: 0.15 }
+        );
+        blocks.slice(1).forEach(function (b) {
+          io.observe(b);
+        });
+
+        // Skip control: reveal everything instantly.
+        if (skipBtn) {
+          skipBtn.addEventListener("click", revealAll);
+        }
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && !done) {
+            revealAll();
+          }
+        });
+
+        // Auto-hide the skip hint once the user has scrolled near the end.
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (done) return;
+            var nearEnd =
+              window.innerHeight + window.scrollY >=
+              document.body.offsetHeight - 200;
+            if (nearEnd && skipBtn) skipBtn.style.opacity = "0";
+          },
+          { passive: true }
+        );
+      })();
+    </script>
+  </body>
+</html>

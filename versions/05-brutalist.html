@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aveline — the agent-friendly wiki</title>
+    <meta
+      name="description"
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aveline.ai/" />
+    <meta property="og:site_name" content="Aveline" />
+    <meta property="og:title" content="The agent-friendly wiki" />
+    <meta
+      property="og:description"
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
+    />
+    <meta property="og:image" content="https://aveline.ai/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#08080a" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ============================================================
+         AVELINE — Variant 05 · BRUTALIST / SWISS GRID
+         Paper canvas, hard near-black, electric blue accent.
+         Exposed grid, thick rules, big section numbers, mono labels.
+      ============================================================ */
+
+      :root {
+        --paper: #efe8d6;
+        --paper-2: #f5f4ef;
+        --ink: #08080a;
+        --blue: #3b82f6;
+        --blue-hot: #1d6dff;
+        --rule: 3px;
+        --rule-fat: 6px;
+        --mono: "JetBrains Mono", ui-monospace, monospace;
+        --sans: "Inter", system-ui, -apple-system, sans-serif;
+        --serif: "Fraunces", "Inter", serif;
+        --maxw: 1320px;
+        --pad: clamp(1.1rem, 4vw, 3rem);
+      }
+
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--sans);
+        background: var(--paper);
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+        line-height: 1.4;
+      }
+
+      ::selection {
+        background: var(--blue);
+        color: #fff;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .wrap {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding-left: var(--pad);
+        padding-right: var(--pad);
+      }
+
+      .mono {
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+
+      /* ── SKIP LINK ─────────────────────────────────────────────── */
+      .skip {
+        position: absolute;
+        left: -999px;
+        top: 0;
+        z-index: 999;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 0.6rem 1rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+      }
+      .skip:focus {
+        left: 0;
+      }
+
+      /* ── STICKY HEADER ─────────────────────────────────────────── */
+      header.bar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--paper);
+        border-bottom: var(--rule) solid var(--ink);
+      }
+      .bar-inner {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 var(--pad);
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        text-decoration: none;
+        font-family: var(--mono);
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-size: 0.82rem;
+      }
+      .brand .mark {
+        width: 26px;
+        height: 26px;
+        display: block;
+        flex: none;
+        border: 2px solid var(--ink);
+      }
+      .nav {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+      }
+      .nav a {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        text-decoration: none;
+        padding: 0.5rem 0.9rem;
+        border-left: 2px solid var(--ink);
+        transition: background 0.12s linear, color 0.12s linear;
+      }
+      .nav a:last-child {
+        border-right: 2px solid var(--ink);
+      }
+      .nav a:hover,
+      .nav a:focus-visible {
+        background: var(--ink);
+        color: var(--paper);
+        outline: none;
+      }
+      .nav a.accent:hover {
+        background: var(--blue);
+      }
+      .nav-ghost {
+        display: none;
+      }
+
+      /* ── MARQUEE TICKER ────────────────────────────────────────── */
+      .ticker {
+        background: var(--ink);
+        color: var(--paper);
+        border-bottom: var(--rule) solid var(--ink);
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+      }
+      .ticker-track {
+        display: inline-flex;
+        align-items: center;
+        will-change: transform;
+        animation: marquee 32s linear infinite;
+      }
+      .ticker-track span {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        padding: 0.7rem 0;
+        display: inline-flex;
+        align-items: center;
+      }
+      .ticker-track span::after {
+        content: "//";
+        color: var(--blue);
+        padding: 0 1.6rem;
+        font-weight: 700;
+      }
+      @keyframes marquee {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+      .ticker:hover .ticker-track {
+        animation-play-state: paused;
+      }
+
+      /* ── SECTION SCAFFOLD ──────────────────────────────────────── */
+      section {
+        border-bottom: var(--rule) solid var(--ink);
+      }
+      .sec-head {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        padding-top: clamp(2.4rem, 5vw, 4rem);
+      }
+      .sec-num {
+        font-family: var(--mono);
+        font-weight: 700;
+        font-size: clamp(2rem, 6vw, 4rem);
+        line-height: 0.8;
+        color: var(--blue);
+        letter-spacing: -0.02em;
+      }
+      .sec-kicker {
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 0.74rem;
+        font-weight: 600;
+        border: 2px solid var(--ink);
+        padding: 0.3rem 0.55rem;
+        align-self: center;
+      }
+
+      /* ── HERO ──────────────────────────────────────────────────── */
+      .hero {
+        padding-bottom: clamp(2rem, 5vw, 3.5rem);
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+        padding-top: clamp(2.4rem, 6vw, 4.5rem);
+      }
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem 0;
+        align-items: stretch;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+      .hero-meta span {
+        border: 2px solid var(--ink);
+        padding: 0.34rem 0.7rem;
+        margin-right: -2px;
+      }
+      .hero-meta span.fill {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+      }
+      h1.huge {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-variation-settings: "opsz" 144;
+        font-size: clamp(2.9rem, 11.5vw, 9.5rem);
+        line-height: 0.9;
+        letter-spacing: -0.03em;
+        text-transform: none;
+      }
+      h1.huge .it {
+        font-style: italic;
+        color: var(--blue);
+        position: relative;
+      }
+      h1.huge .blk {
+        display: inline-block;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 0 0.12em;
+        transform: rotate(-1.2deg);
+      }
+      .hero-bottom {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.6rem;
+        align-items: end;
+        border-top: var(--rule) solid var(--ink);
+        padding-top: 1.6rem;
+        margin-top: 0.5rem;
+      }
+      .hero-lede {
+        font-size: clamp(1.05rem, 2vw, 1.4rem);
+        max-width: 34ch;
+        font-weight: 400;
+      }
+      .hero-lede b {
+        font-weight: 700;
+      }
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+      }
+
+      /* ── BUTTONS ───────────────────────────────────────────────── */
+      .btn {
+        font-family: var(--mono);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.92rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1rem 1.6rem;
+        border: var(--rule) solid var(--ink);
+        background: var(--paper);
+        color: var(--ink);
+        cursor: pointer;
+        transition: background 0.14s linear, color 0.14s linear,
+          transform 0.14s ease, box-shadow 0.14s ease;
+        white-space: nowrap;
+      }
+      .btn + .btn {
+        margin-left: -3px;
+      }
+      .btn .arr {
+        transition: transform 0.18s ease;
+      }
+      .btn:hover,
+      .btn:focus-visible {
+        background: var(--ink);
+        color: var(--paper);
+        outline: none;
+        position: relative;
+        z-index: 2;
+      }
+      .btn:hover .arr {
+        transform: translate(3px, -3px);
+      }
+      .btn.primary {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+      }
+      .btn.primary:hover,
+      .btn.primary:focus-visible {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: #fff;
+      }
+
+      /* ── PROBLEM / STALE DOC ───────────────────────────────────── */
+      .prob-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: clamp(1.8rem, 4vw, 3rem) 0 clamp(2.4rem, 5vw, 4rem);
+      }
+      .prob-copy h2 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-variation-settings: "opsz" 90;
+        font-size: clamp(1.9rem, 5.5vw, 4rem);
+        line-height: 0.96;
+        letter-spacing: -0.02em;
+        margin: 1.4rem 0 1rem;
+      }
+      .prob-copy h2 .strike {
+        text-decoration: line-through;
+        text-decoration-thickness: 4px;
+        text-decoration-color: var(--blue);
+      }
+      .prob-copy p {
+        max-width: 46ch;
+        font-size: 1.05rem;
+      }
+      .doc-card {
+        border: var(--rule) solid var(--ink);
+        background: var(--paper-2);
+        margin-top: 2rem;
+        box-shadow: 12px 12px 0 var(--ink);
+      }
+      .doc-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        border-bottom: var(--rule) solid var(--ink);
+        padding: 0.7rem 1rem;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+      .doc-head .stamp {
+        background: var(--ink);
+        color: var(--paper);
+        padding: 0.2rem 0.5rem;
+      }
+      .doc-body {
+        padding: 1.2rem 1rem;
+        font-family: var(--mono);
+        font-size: 0.92rem;
+        line-height: 1.9;
+      }
+      .doc-body s {
+        color: #b91c1c;
+        text-decoration-thickness: 2px;
+      }
+      .doc-body .faded {
+        opacity: 0.45;
+      }
+      .doc-foot {
+        border-top: var(--rule) solid var(--ink);
+        background: var(--blue);
+        color: #fff;
+        padding: 0.7rem 1rem;
+        font-family: var(--mono);
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+
+      /* ── DARK SECTION (WHAT CHANGED) ───────────────────────────── */
+      section.dark {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      section.dark .sec-num {
+        color: var(--blue);
+      }
+      section.dark .sec-kicker {
+        border-color: var(--paper);
+        color: var(--paper);
+      }
+      .changed {
+        padding: clamp(1.8rem, 4vw, 3rem) 0 clamp(2.4rem, 5vw, 4rem);
+      }
+      .changed h2 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-variation-settings: "opsz" 110;
+        font-size: clamp(2rem, 6.5vw, 5rem);
+        line-height: 0.94;
+        letter-spacing: -0.025em;
+        margin: 1.4rem 0 1.2rem;
+        max-width: 16ch;
+      }
+      .changed h2 .it {
+        font-style: italic;
+        color: var(--blue);
+      }
+      .changed p {
+        max-width: 52ch;
+        font-size: 1.1rem;
+        opacity: 0.86;
+        margin-bottom: 2.2rem;
+      }
+      .term {
+        border: var(--rule) solid var(--paper);
+        background: #050507;
+        max-width: 640px;
+      }
+      .term-bar {
+        border-bottom: var(--rule) solid var(--paper);
+        padding: 0.6rem 0.9rem;
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        color: var(--paper);
+      }
+      .term-bar i {
+        width: 11px;
+        height: 11px;
+        border: 2px solid var(--paper);
+        display: block;
+      }
+      .term-bar span {
+        margin-left: auto;
+        opacity: 0.6;
+      }
+      .term-body {
+        padding: 1.2rem;
+        font-family: var(--mono);
+        font-size: clamp(0.82rem, 1.6vw, 1rem);
+        line-height: 1.85;
+        color: var(--paper);
+      }
+      .term-body .pfx {
+        color: var(--blue);
+        font-weight: 700;
+      }
+      .term-body .cmd {
+        color: #fff;
+        font-weight: 700;
+      }
+      .term-body .arg {
+        color: var(--blue);
+      }
+      .term-body .out {
+        display: block;
+        opacity: 0.7;
+        margin-top: 0.3rem;
+      }
+      .term-body .out b {
+        color: var(--blue);
+        opacity: 1;
+      }
+      .term-body .cursor {
+        display: inline-block;
+        width: 0.55em;
+        height: 1.05em;
+        background: var(--blue);
+        vertical-align: -0.15em;
+        animation: blink 1s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ── HOW IT WORKS — numbered manifesto rows ────────────────── */
+      .steps {
+        padding-bottom: clamp(1.5rem, 4vw, 3rem);
+        margin-top: clamp(1.8rem, 4vw, 2.6rem);
+        border-top: var(--rule) solid var(--ink);
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.5rem 2rem;
+        padding: clamp(1.4rem, 3vw, 2.2rem) 0;
+        border-bottom: 2px solid var(--ink);
+        position: relative;
+        transition: background 0.16s linear, color 0.16s linear,
+          padding-left 0.2s ease, padding-right 0.2s ease;
+      }
+      .step:last-child {
+        border-bottom: none;
+      }
+      .step:hover {
+        background: var(--ink);
+        color: var(--paper);
+        padding-left: clamp(0.4rem, 1.5vw, 1rem);
+        padding-right: clamp(0.4rem, 1.5vw, 1rem);
+      }
+      .step:hover .step-tag,
+      .step:hover .step-n {
+        color: var(--blue);
+      }
+      .step-n {
+        font-family: var(--mono);
+        font-weight: 700;
+        font-size: clamp(1.6rem, 4vw, 2.6rem);
+        line-height: 1;
+        color: var(--ink);
+      }
+      .step-tag {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--blue);
+        margin-top: 0.4rem;
+      }
+      .step h3 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+        line-height: 1;
+        letter-spacing: -0.01em;
+      }
+      .step p {
+        font-size: 1rem;
+        max-width: 50ch;
+      }
+      .step code {
+        font-family: var(--mono);
+        background: var(--blue);
+        color: #fff;
+        padding: 0.05em 0.4em;
+        font-size: 0.86em;
+        font-weight: 600;
+      }
+      .step:hover code {
+        background: var(--blue);
+      }
+
+      /* ── SPEC TABLE (TRUST) ────────────────────────────────────── */
+      .spec-intro {
+        padding: clamp(1.6rem, 3vw, 2.4rem) 0 0;
+        max-width: 56ch;
+        font-size: 1.08rem;
+        opacity: 0.9;
+      }
+      .spec {
+        width: 100%;
+        border-collapse: collapse;
+        margin: clamp(1.6rem, 3vw, 2.4rem) 0 clamp(2.4rem, 5vw, 4rem);
+        border: var(--rule) solid var(--paper);
+        font-size: 1rem;
+      }
+      .spec th,
+      .spec td {
+        text-align: left;
+        padding: 1.1rem 1.1rem;
+        border-bottom: 2px solid var(--paper);
+        vertical-align: top;
+      }
+      .spec thead th {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-weight: 600;
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+      }
+      .spec tbody tr {
+        transition: background 0.14s linear, color 0.14s linear;
+      }
+      .spec tbody tr:hover {
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .spec tbody tr:last-child td {
+        border-bottom: none;
+      }
+      .spec .key {
+        font-family: var(--mono);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--blue);
+        white-space: nowrap;
+        font-size: 0.86rem;
+      }
+      .spec tr:hover .key {
+        color: var(--blue-hot);
+      }
+      .spec .title {
+        font-weight: 700;
+        font-size: 1.02rem;
+      }
+      .spec .desc {
+        opacity: 0.85;
+        max-width: 48ch;
+      }
+      .spec tr:hover .desc {
+        opacity: 1;
+      }
+
+      /* ── SOLO → TEAM ───────────────────────────────────────────── */
+      .solo {
+        padding: clamp(2.2rem, 5vw, 4rem) 0;
+      }
+      .solo-head {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        font-family: var(--mono);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: clamp(1.6rem, 5vw, 3.4rem);
+      }
+      .solo-head .chip {
+        border: var(--rule) solid var(--ink);
+        padding: 0.2em 0.5em;
+        line-height: 1;
+      }
+      .solo-head .chip.fill {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: #fff;
+      }
+      .solo-head .to {
+        color: var(--blue);
+        font-size: 1.2em;
+      }
+      .solo p {
+        max-width: 56ch;
+        font-size: 1.1rem;
+        margin-top: 1.6rem;
+      }
+      .solo p .hl {
+        background: var(--blue);
+        color: #fff;
+        padding: 0 0.2em;
+      }
+
+      /* ── CTA BLOCK ─────────────────────────────────────────────── */
+      .cta {
+        background: var(--ink);
+        color: var(--paper);
+        border-bottom: var(--rule) solid var(--ink);
+      }
+      .cta-inner {
+        padding: clamp(3rem, 8vw, 6.5rem) 0 clamp(2.6rem, 6vw, 4.5rem);
+      }
+      .cta .kicker {
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 0.74rem;
+        color: var(--blue);
+        margin-bottom: 1.4rem;
+        display: block;
+      }
+      .cta h2 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-variation-settings: "opsz" 144;
+        font-size: clamp(2.6rem, 12vw, 9rem);
+        line-height: 0.86;
+        letter-spacing: -0.03em;
+      }
+      .cta h2 .it {
+        font-style: italic;
+        color: var(--blue);
+      }
+      .cta p {
+        max-width: 46ch;
+        margin: 1.8rem 0 2.4rem;
+        font-size: 1.1rem;
+        opacity: 0.85;
+      }
+      .cta-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+      }
+      .cta .btn {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--paper);
+        font-size: 1.05rem;
+        padding: 1.25rem 2rem;
+      }
+      .cta .btn:hover,
+      .cta .btn:focus-visible {
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .cta .btn.primary {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: #fff;
+      }
+      .cta .btn.primary:hover,
+      .cta .btn.primary:focus-visible {
+        background: var(--paper);
+        color: var(--ink);
+        border-color: var(--paper);
+      }
+
+      /* ── FOOTER ────────────────────────────────────────────────── */
+      footer.foot {
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .foot-inner {
+        padding: 2rem 0 2.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--mono);
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .foot-links {
+        display: flex;
+        gap: 0;
+      }
+      .foot-links a {
+        text-decoration: none;
+        padding: 0.5rem 0.9rem;
+        border: 2px solid var(--ink);
+        margin-left: -2px;
+        transition: background 0.14s linear, color 0.14s linear;
+      }
+      .foot-links a:hover {
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      /* ── REVEAL ────────────────────────────────────────────────── */
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transition-delay: calc(var(--d, 0) * 80ms);
+      }
+      [data-reveal].in {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* ── RESPONSIVE GRID UP ────────────────────────────────────── */
+      @media (min-width: 760px) {
+        .nav-ghost {
+          display: inline-flex;
+        }
+        .hero-bottom {
+          grid-template-columns: 1.1fr 1fr;
+        }
+        .hero-actions {
+          justify-content: flex-end;
+        }
+        .prob-grid {
+          grid-template-columns: 1.05fr 0.95fr;
+          gap: clamp(2rem, 5vw, 4rem);
+          align-items: start;
+        }
+        .doc-card {
+          margin-top: 0.5rem;
+        }
+        .step {
+          grid-template-columns: auto 1fr 1.3fr;
+          align-items: start;
+        }
+        .step .step-meta {
+          display: flex;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 759px) {
+        .step .step-meta {
+          display: flex;
+          align-items: baseline;
+          gap: 0.8rem;
+        }
+        .spec thead {
+          display: none;
+        }
+        .spec,
+        .spec tbody,
+        .spec tr,
+        .spec td {
+          display: block;
+          width: 100%;
+        }
+        .spec tr {
+          border-bottom: var(--rule) solid var(--paper);
+        }
+        .spec td {
+          border-bottom: 2px solid rgba(239, 232, 214, 0.3);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+        }
+        html {
+          scroll-behavior: auto;
+        }
+        [data-reveal] {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
+        .ticker-track {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <!-- ── STICKY HEADER ──────────────────────────────────────── -->
+    <header class="bar">
+      <div class="bar-inner">
+        <a class="brand" href="#top" aria-label="Aveline home">
+          <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+            <rect x="0" y="0" width="16" height="32" fill="#efe8d6" />
+            <rect x="16" y="0" width="16" height="32" fill="#08080a" />
+            <rect x="14.6" y="0" width="2.8" height="32" fill="#3B82F6" />
+          </svg>
+          Aveline
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-ghost" href="#problem">01</a>
+          <a class="nav-ghost" href="#changed">02</a>
+          <a class="nav-ghost" href="#how">03</a>
+          <a class="nav-ghost" href="#trust">04</a>
+          <a href="https://github.com/aveline-ai/aveline" target="_blank" rel="noopener">Code ↗</a>
+          <a class="accent" href="https://app.aveline.ai">Try it</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ── MARQUEE TICKER ─────────────────────────────────────── -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>The agent-friendly wiki</span><span>Open source</span><span>Self-hostable</span
+        ><span>A clean read for humans</span><span>An API for agents</span
+        ><span>Every fact has an owner</span><span>Pinned memory</span
+        ><span>The agent-friendly wiki</span><span>Open source</span><span>Self-hostable</span
+        ><span>A clean read for humans</span><span>An API for agents</span
+        ><span>Every fact has an owner</span><span>Pinned memory</span>
+      </div>
+    </div>
+
+    <main id="main">
+      <!-- ── HERO ─────────────────────────────────────────────── -->
+      <section class="hero" id="top">
+        <div class="wrap">
+          <div class="hero-grid">
+            <div class="hero-meta" data-reveal>
+              <span class="fill">v1.0 / STABLE</span>
+              <span>MIT LICENSE</span>
+              <span>SELF-HOSTABLE</span>
+              <span>HUMAN + AGENT</span>
+            </div>
+            <h1 class="huge" data-reveal style="--d: 1">
+              A wiki<br />
+              <span class="blk">you</span> <span class="it">&amp; it</span><br />
+              both trust.
+            </h1>
+            <div class="hero-bottom">
+              <p class="hero-lede" data-reveal style="--d: 2">
+                The open-source wiki your agents <b>write as they work</b> —
+                a clean read for humans, an API for agents. Knowledge that
+                stays alive.
+              </p>
+              <div class="hero-actions" data-reveal style="--d: 3">
+                <a class="btn primary" href="https://app.aveline.ai">Try it</a>
+                <a
+                  class="btn"
+                  href="https://github.com/aveline-ai/aveline"
+                  target="_blank"
+                  rel="noopener"
+                  >Deploy it<span class="arr" aria-hidden="true">↗</span></a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 01 · THE PROBLEM ─────────────────────────────────── -->
+      <section id="problem">
+        <div class="wrap">
+          <div class="sec-head" data-reveal>
+            <span class="sec-num">01</span>
+            <span class="sec-kicker">The problem</span>
+          </div>
+          <div class="prob-grid">
+            <div class="prob-copy">
+              <h2 data-reveal style="--d: 1">
+                Every wiki you've had quietly
+                <span class="strike">went stale</span>.
+              </h2>
+              <p data-reveal style="--d: 2">
+                It always starts tidy. Then the work moves on, and nobody
+                goes back to fix the page. Six months later the docs are
+                lying to you — so you stop trusting them, so you stop
+                writing them. Same quiet death, every time.
+              </p>
+            </div>
+            <div class="doc-card" data-reveal style="--d: 2">
+              <div class="doc-head">
+                <span>deploy-runbook.md</span>
+                <span class="stamp">edited 9mo ago</span>
+              </div>
+              <div class="doc-body">
+                <div>Staging deploys run through <s>Jenkins</s>.</div>
+                <div class="faded">Ping Priya for the staging creds.</div>
+                <div class="faded">Nightly cron fires at <s>2am UTC</s>.</div>
+              </div>
+              <div class="doc-foot">Jenkins is gone. Priya left in March.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 02 · WHAT CHANGED (DARK) ─────────────────────────── -->
+      <section class="dark" id="changed">
+        <div class="wrap">
+          <div class="sec-head" data-reveal>
+            <span class="sec-num">02</span>
+            <span class="sec-kicker">What changed</span>
+          </div>
+          <div class="changed">
+            <h2 data-reveal style="--d: 1">
+              Your work already runs through an <span class="it">agent</span>.
+            </h2>
+            <p data-reveal style="--d: 2">
+              So stop hand-writing the docs. The agent that did the work
+              writes down what it learned, as it goes. You read it. You keep
+              the parts that matter. The notes stay alive because keeping
+              them alive is finally part of the work.
+            </p>
+            <div class="term" data-reveal style="--d: 3">
+              <div class="term-bar">
+                <i></i><i></i><i></i><span>~/work</span>
+              </div>
+              <div class="term-body">
+                <span
+                  ><span class="pfx">›</span> <span class="cmd">aveline save</span>
+                  <span class="arg">--pin --title "staging deploy"</span></span
+                >
+                <span class="out"
+                  >saved · <b>owned by you</b> · pinned to workspace memory</span
+                >
+                <span
+                  ><span class="pfx">›</span> <span class="cursor"></span
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 03 · HOW IT WORKS ────────────────────────────────── -->
+      <section id="how">
+        <div class="wrap">
+          <div class="sec-head" data-reveal>
+            <span class="sec-num">03</span>
+            <span class="sec-kicker">How it works</span>
+          </div>
+          <div class="steps">
+            <div class="step" data-reveal>
+              <div class="step-meta">
+                <span class="step-n">01</span>
+                <span class="step-tag">Capture</span>
+              </div>
+              <h3>It writes as it goes</h3>
+              <p>
+                When your agent figures something out, it saves it with one
+                line — <code>aveline save</code>. No blank page, no
+                context-switch, no chore bolted on after.
+              </p>
+            </div>
+            <div class="step" data-reveal style="--d: 1">
+              <div class="step-meta">
+                <span class="step-n">02</span>
+                <span class="step-tag">Curate</span>
+              </div>
+              <h3>You keep what matters</h3>
+              <p>
+                Pin the notes worth remembering. <code>Pinned</code> notes
+                are your real memory; everything else is a searchable
+                scratchpad.
+              </p>
+            </div>
+            <div class="step" data-reveal style="--d: 2">
+              <div class="step-meta">
+                <span class="step-n">03</span>
+                <span class="step-tag">Recall</span>
+              </div>
+              <h3>It starts already knowing</h3>
+              <p>
+                Next session, the pinned notes load straight back into your
+                agent. No re-explaining what it should already know.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 04 · WHY YOU'LL TRUST IT (DARK SPEC TABLE) ───────── -->
+      <section class="dark" id="trust">
+        <div class="wrap">
+          <div class="sec-head" data-reveal>
+            <span class="sec-num">04</span>
+            <span class="sec-kicker">Why you'll trust it</span>
+          </div>
+          <p class="spec-intro" data-reveal style="--d: 1">
+            A wiki is only worth reading if you believe it. So every fact
+            carries the things that make it believable — the raw spec:
+          </p>
+          <table class="spec" data-reveal style="--d: 2">
+            <thead>
+              <tr>
+                <th scope="col">Mechanic</th>
+                <th scope="col">Guarantee</th>
+                <th scope="col">What it means</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="key">owner</td>
+                <td class="title">Every fact has a name on it</td>
+                <td class="desc">
+                  Someone owns it and answers for it. Not "the team wrote
+                  this" — a person.
+                </td>
+              </tr>
+              <tr>
+                <td class="key">history</td>
+                <td class="title">Every change is on the record</td>
+                <td class="desc">
+                  Who wrote what, when, and where it came from. Nothing
+                  appears from nowhere; nothing changes in the dark.
+                </td>
+              </tr>
+              <tr>
+                <td class="key">flag</td>
+                <td class="title">Stale facts get called out</td>
+                <td class="desc">
+                  Anyone — even an agent a wrong fact just burned — can flag
+                  it. The owner verifies, fixes, or retires it.
+                </td>
+              </tr>
+              <tr>
+                <td class="key">version</td>
+                <td class="title">Pinned to a known-good state</td>
+                <td class="desc">
+                  <code style="font-family: var(--mono); color: var(--blue)">aveline</code>
+                  marks the version everyone — and every agent — reads by
+                  default. Drafts stay out of the way.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── 05 · SOLO → TEAM ─────────────────────────────────── -->
+      <section id="team">
+        <div class="wrap">
+          <div class="sec-head" data-reveal>
+            <span class="sec-num">05</span>
+            <span class="sec-kicker">Starts with you</span>
+          </div>
+          <div class="solo">
+            <div class="solo-head" data-reveal style="--d: 1">
+              <span class="chip">SOLO</span>
+              <span class="to" aria-hidden="true">→</span>
+              <span class="chip fill">TEAM</span>
+            </div>
+            <p data-reveal style="--d: 2">
+              Begin solo — it's the memory your agent has been missing
+              between sessions. When it has earned its place,
+              <span class="hl">invite your team</span> into the same
+              workspace. Same notes, now shared. Mentions, threads and
+              ownership come alive. Nothing about how it works changes.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 06 · CTA ─────────────────────────────────────────── -->
+      <section class="cta" id="get-started">
+        <div class="wrap cta-inner">
+          <span class="kicker" data-reveal>06 / Open source · yours to keep</span>
+          <h2 data-reveal style="--d: 1">
+            Read it.<br />Run it.<br /><span class="it">Keep it.</span>
+          </h2>
+          <p data-reveal style="--d: 2">
+            Your team's knowledge is too important to rent. Aveline is open
+            source and self-hostable — read the code, run it on your own
+            box, or let us host it for you.
+          </p>
+          <div class="cta-actions" data-reveal style="--d: 3">
+            <a class="btn primary" href="https://app.aveline.ai">Try it</a>
+            <a
+              class="btn"
+              href="https://github.com/aveline-ai/aveline"
+              target="_blank"
+              rel="noopener"
+              >Deploy it<span class="arr" aria-hidden="true">↗</span></a
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- ── FOOTER ───────────────────────────────────────────── -->
+      <footer class="foot">
+        <div class="wrap foot-inner">
+          <div class="foot-links">
+            <a href="https://app.aveline.ai">App</a>
+            <a href="https://github.com/aveline-ai" target="_blank" rel="noopener">GitHub</a>
+          </div>
+          <div>Aveline · the agent-friendly wiki · open source</div>
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      /* Scroll reveal — IntersectionObserver, respects reduced motion */
+      (function () {
+        const reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+        const els = document.querySelectorAll("[data-reveal]");
+        if (reduced || !("IntersectionObserver" in window)) {
+          els.forEach((e) => e.classList.add("in"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("in");
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+        );
+        els.forEach((e) => io.observe(e));
+      })();
+
+      /* Header rule snaps thicker once the page is scrolled */
+      (function () {
+        const bar = document.querySelector("header.bar");
+        const onScroll = () => {
+          bar.style.borderBottomWidth = window.scrollY > 8 ? "6px" : "3px";
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+      })();
+    </script>
+  </body>
+</html>

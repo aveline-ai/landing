@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aveline — the agent-friendly wiki</title>
+    <meta
+      name="description"
+      content="An open-source, agent-friendly wiki — a living, shared knowledge layer your team and your agents both read from."
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aveline.ai/" />
+    <meta property="og:site_name" content="Aveline" />
+    <meta property="og:title" content="The agent-friendly wiki" />
+    <meta
+      property="og:description"
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
+    />
+    <meta property="og:image" content="https://aveline.ai/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Aveline — the agent-friendly wiki" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The agent-friendly wiki" />
+    <meta name="twitter:image" content="https://aveline.ai/og.png" />
+
+    <meta name="theme-color" content="#08080a" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #08080a;
+        --bg-soft: #0c0c12;
+        --blue: #3b82f6;
+        --blue-bright: #4f8ef7;
+        --ink: #e9eaee;
+        --ink-dim: rgba(233, 234, 238, 0.62);
+        --ink-faint: rgba(233, 234, 238, 0.4);
+        --line: rgba(255, 255, 255, 0.08);
+        --glass: rgba(14, 15, 22, 0.55);
+        --glass-strong: rgba(12, 13, 20, 0.72);
+      }
+
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        line-height: 1.55;
+        overflow-x: hidden;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      /* ───────── fixed graph backdrop ───────── */
+      #graph {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        display: block;
+      }
+
+      /* soft vignette + top gradient so text stays legible over the graph */
+      .veil {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            120% 80% at 50% 0%,
+            rgba(59, 130, 246, 0.08) 0%,
+            rgba(8, 8, 10, 0) 45%
+          ),
+          radial-gradient(
+            100% 100% at 50% 50%,
+            rgba(8, 8, 10, 0) 30%,
+            rgba(8, 8, 10, 0.55) 100%
+          );
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* ───────── top nav ───────── */
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.15rem clamp(1.25rem, 4vw, 3rem);
+        backdrop-filter: blur(10px) saturate(140%);
+        -webkit-backdrop-filter: blur(10px) saturate(140%);
+        background: linear-gradient(
+          180deg,
+          rgba(8, 8, 10, 0.7) 0%,
+          rgba(8, 8, 10, 0) 100%
+        );
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: var(--ink);
+      }
+      .brand .mark {
+        width: 26px;
+        height: 26px;
+        flex: none;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1.6rem;
+        font-size: 0.85rem;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--ink-dim);
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--ink);
+      }
+      .nav-cta {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem !important;
+        letter-spacing: 0.02em;
+        padding: 0.5rem 0.95rem;
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        border-radius: 8px;
+        color: var(--blue-bright) !important;
+        background: rgba(59, 130, 246, 0.06);
+        transition: background 0.2s, border-color 0.2s !important;
+      }
+      .nav-cta:hover {
+        background: rgba(59, 130, 246, 0.14);
+        border-color: rgba(59, 130, 246, 0.6);
+      }
+      @media (max-width: 720px) {
+        .nav-links a:not(.nav-cta) {
+          display: none;
+        }
+      }
+
+      /* ───────── hero ───────── */
+      .hero {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 7rem clamp(1.25rem, 5vw, 2rem) 4rem;
+      }
+
+      .glass {
+        background: var(--glass);
+        backdrop-filter: blur(18px) saturate(130%);
+        -webkit-backdrop-filter: blur(18px) saturate(130%);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.05) inset,
+          0 30px 80px -30px rgba(0, 0, 0, 0.8);
+      }
+
+      .hero-card {
+        max-width: 720px;
+        padding: clamp(2rem, 5vw, 3.2rem);
+        animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.74rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--blue-bright);
+        padding: 0.4rem 0.85rem;
+        border: 1px solid rgba(59, 130, 246, 0.28);
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.07);
+        margin-bottom: 1.6rem;
+      }
+      .eyebrow .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--blue-bright);
+        box-shadow: 0 0 10px var(--blue-bright);
+        animation: pulse 2.4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.7); }
+      }
+
+      h1 {
+        font-family: "Fraunces", "Inter", serif;
+        font-weight: 500;
+        font-size: clamp(2.3rem, 6vw, 4.1rem);
+        line-height: 1.04;
+        letter-spacing: -0.025em;
+        font-variation-settings: "opsz" 100;
+        margin-bottom: 1.3rem;
+      }
+      h1 .glow {
+        color: var(--blue-bright);
+        font-style: italic;
+        text-shadow: 0 0 32px rgba(79, 142, 247, 0.45);
+      }
+
+      .subhead {
+        font-size: clamp(1rem, 1.6vw, 1.2rem);
+        color: var(--ink-dim);
+        max-width: 32rem;
+        margin: 0 auto 2.1rem;
+      }
+
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem;
+        justify-content: center;
+      }
+
+      .btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        text-decoration: none;
+        cursor: pointer;
+        white-space: nowrap;
+        font-weight: 500;
+        transition: transform 0.22s ease, box-shadow 0.22s ease,
+          background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+      }
+      .btn:focus-visible {
+        outline: 2px solid var(--blue);
+        outline-offset: 4px;
+      }
+      .btn:active {
+        transform: translateY(-1px) !important;
+      }
+
+      .btn.primary {
+        font-size: 1.02rem;
+        padding: 0.95rem 1.8rem;
+        border-radius: 11px;
+        color: #061018;
+        background: linear-gradient(180deg, #6aa3ff, var(--blue));
+        border: 1px solid rgba(120, 170, 255, 0.6);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.35) inset,
+          0 16px 40px -14px rgba(59, 130, 246, 0.7);
+      }
+      .btn.primary:hover {
+        transform: translateY(-3px);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.4) inset,
+          0 24px 50px -16px rgba(59, 130, 246, 0.85);
+      }
+
+      .btn.ghost {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.95rem;
+        padding: 0.95rem 1.5rem;
+        border-radius: 11px;
+        color: var(--blue-bright);
+        background: rgba(12, 12, 18, 0.6);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
+      .btn.ghost::before {
+        content: "›";
+        color: rgba(79, 142, 247, 0.7);
+        font-weight: 600;
+      }
+      .btn.ghost .arrow {
+        transition: transform 0.22s ease;
+      }
+      .btn.ghost:hover {
+        transform: translateY(-3px);
+        background: rgba(16, 16, 24, 0.75);
+        border-color: rgba(59, 130, 246, 0.55);
+        color: #76a7ff;
+        box-shadow: 0 0 26px -6px rgba(59, 130, 246, 0.5);
+      }
+      .btn.ghost:hover .arrow {
+        transform: translate(2px, -2px);
+      }
+
+      .scroll-hint {
+        margin-top: 3.2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+      }
+      .scroll-hint .chev {
+        width: 18px;
+        height: 18px;
+        border-right: 1.5px solid var(--ink-faint);
+        border-bottom: 1.5px solid var(--ink-faint);
+        transform: rotate(45deg);
+        animation: bob 2s ease-in-out infinite;
+      }
+      @keyframes bob {
+        0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: 0.5; }
+        50% { transform: rotate(45deg) translate(3px, 3px); opacity: 1; }
+      }
+
+      /* ───────── content sections ───────── */
+      section.beat {
+        padding: clamp(4rem, 11vh, 8rem) clamp(1.25rem, 5vw, 2rem);
+        display: flex;
+        justify-content: center;
+      }
+      .beat-inner {
+        width: min(1040px, 100%);
+      }
+
+      .section-head {
+        max-width: 600px;
+        margin-bottom: 2.6rem;
+      }
+      .kicker {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.74rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--blue-bright);
+        margin-bottom: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+      }
+      .kicker::before {
+        content: "";
+        width: 22px;
+        height: 1.5px;
+        background: var(--blue);
+      }
+      .section-head h2 {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+      }
+      .section-head p {
+        margin-top: 1rem;
+        color: var(--ink-dim);
+        font-size: 1.05rem;
+      }
+
+      /* feature trio */
+      .trio {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.1rem;
+      }
+      @media (max-width: 820px) {
+        .trio {
+          grid-template-columns: 1fr;
+        }
+      }
+      .card {
+        padding: 1.8rem 1.6rem;
+        border-radius: 16px;
+        background: var(--glass-strong);
+        backdrop-filter: blur(16px) saturate(130%);
+        -webkit-backdrop-filter: blur(16px) saturate(130%);
+        border: 1px solid var(--line);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+          border-color 0.3s, box-shadow 0.3s;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(59, 130, 246, 0.32);
+        box-shadow: 0 24px 50px -28px rgba(59, 130, 246, 0.5);
+      }
+      .card .ico {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        color: var(--blue-bright);
+        margin-bottom: 1.1rem;
+      }
+      .card .ico svg {
+        width: 20px;
+        height: 20px;
+      }
+      .card h3 {
+        font-size: 1.12rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.01em;
+      }
+      .card p {
+        color: var(--ink-dim);
+        font-size: 0.95rem;
+      }
+      .card code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.86em;
+        color: var(--blue-bright);
+        background: rgba(59, 130, 246, 0.1);
+        padding: 0.05em 0.35em;
+        border-radius: 4px;
+      }
+
+      /* solo → team beat */
+      .grow {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 2.4rem;
+        align-items: center;
+      }
+      @media (max-width: 820px) {
+        .grow {
+          grid-template-columns: 1fr;
+        }
+      }
+      .grow-visual {
+        position: relative;
+        aspect-ratio: 4 / 3;
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--glass-strong);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      .grow-visual canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .grow-visual .stage-label {
+        position: absolute;
+        left: 1rem;
+        bottom: 0.9rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        color: var(--ink-dim);
+        z-index: 2;
+      }
+      .grow-visual .stage-label b {
+        color: var(--blue-bright);
+        font-weight: 600;
+      }
+
+      .stages {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.4rem;
+        flex-wrap: wrap;
+      }
+      .stage-pill {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.74rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        color: var(--ink-dim);
+        background: rgba(255, 255, 255, 0.02);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .stage-pill.active {
+        color: var(--blue-bright);
+        border-color: rgba(59, 130, 246, 0.5);
+        background: rgba(59, 130, 246, 0.1);
+      }
+
+      /* final CTA */
+      .final {
+        text-align: center;
+        padding: clamp(5rem, 14vh, 9rem) clamp(1.25rem, 5vw, 2rem) 3rem;
+      }
+      .final-card {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: clamp(2.4rem, 6vw, 3.6rem);
+        text-align: center;
+      }
+      .final-card h2 {
+        font-family: "Fraunces", serif;
+        font-weight: 500;
+        font-size: clamp(2rem, 5vw, 3rem);
+        letter-spacing: -0.02em;
+        line-height: 1.06;
+        margin-bottom: 1rem;
+      }
+      .final-card p {
+        color: var(--ink-dim);
+        margin-bottom: 2rem;
+      }
+      .final-card .cta-row {
+        justify-content: center;
+      }
+
+      footer {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 2rem 1.5rem 3rem;
+        color: var(--ink-faint);
+        font-size: 0.82rem;
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 0.05em;
+      }
+      footer a {
+        color: var(--ink-dim);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--ink);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .hero-card, .scroll-hint { animation: none; }
+        .eyebrow .dot, .scroll-hint .chev { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- LIVING KNOWLEDGE GRAPH -->
+    <canvas id="graph" aria-hidden="true"></canvas>
+    <div class="veil"></div>
+
+    <header>
+      <a class="brand" href="#top">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <clipPath id="bm"><rect x="1" y="1" width="30" height="30" rx="7.5" /></clipPath>
+          </defs>
+          <g clip-path="url(#bm)">
+            <rect x="0" y="0" width="16" height="32" fill="#ffffff" />
+            <rect x="16" y="0" width="16" height="32" fill="#08080a" />
+            <rect x="15.4" y="0" width="1.2" height="32" fill="#3B82F6" opacity="0.9" />
+            <circle cx="8.4" cy="16" r="3.4" fill="#1a1410" />
+            <rect x="22" y="9.5" width="3.4" height="13" rx="1.7" fill="#3B82F6" />
+          </g>
+          <rect x="1" y="1" width="30" height="30" rx="7.5" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="1.5" />
+        </svg>
+        Aveline
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#how">How it works</a>
+        <a href="#grow">Solo &rarr; Team</a>
+        <a href="https://github.com/aveline-ai/aveline" target="_blank" rel="noopener">GitHub</a>
+        <a class="nav-cta" href="https://app.aveline.ai">Try it</a>
+      </nav>
+    </header>
+
+    <div class="wrap" id="top">
+      <!-- HERO -->
+      <main class="hero">
+        <div class="hero-card glass">
+          <span class="eyebrow"><span class="dot"></span> Your agent's shared memory</span>
+          <h1>The knowledge layer<br />your team and your<br /><span class="glow">agents</span> both read.</h1>
+          <p class="subhead">
+            Aveline is an open-source, agent-friendly wiki. Every runbook,
+            decision, and credential becomes a linked node — a clean read for
+            humans, a queryable graph for agents.
+          </p>
+          <div class="cta-row">
+            <a class="btn primary" href="https://app.aveline.ai">Try it</a>
+            <a class="btn ghost" href="https://github.com/aveline-ai/aveline" target="_blank" rel="noopener">
+              Deploy it <span class="arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+        <div class="scroll-hint" aria-hidden="true">
+          Explore the graph
+          <span class="chev"></span>
+        </div>
+      </main>
+
+      <!-- HOW IT WORKS — feature trio -->
+      <section class="beat" id="how">
+        <div class="beat-inner">
+          <div class="section-head glass" style="padding:1.6rem 1.8rem;">
+            <span class="kicker">How it works</span>
+            <h2>Knowledge that links itself.</h2>
+            <p>
+              Write naturally. Aveline turns <code>@mentions</code> into edges,
+              so context compounds instead of scattering across tabs and threads.
+            </p>
+          </div>
+          <div class="trio">
+            <article class="card">
+              <div class="ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="6" r="2.5" />
+                  <circle cx="12" cy="18" r="2.5" />
+                  <path d="M7.6 7.8 11 16M16.4 7.8 13 16" stroke-linecap="round" />
+                </svg>
+              </div>
+              <h3>Linked by @mention</h3>
+              <p>Reference <code>oncall</code> or <code>auth-flow</code> and the link is made. The graph is the source of truth, not a side effect.</p>
+            </article>
+            <article class="card">
+              <div class="ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M4 7h16M4 12h16M4 17h10" stroke-linecap="round" />
+                </svg>
+              </div>
+              <h3>A clean read</h3>
+              <p>Humans get a calm, fast wiki. No markup soup — just pages that are pleasant to skim, search, and trust.</p>
+            </article>
+            <article class="card">
+              <div class="ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="m9 7-4 5 4 5M15 7l4 5-4 5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+              <h3>An API for agents</h3>
+              <p>Agents traverse the same graph over a typed API — fetching <code>staging-creds</code> or a <code>postmortem</code> with full context attached.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- SOLO → TEAM -->
+      <section class="beat" id="grow">
+        <div class="beat-inner">
+          <div class="grow">
+            <div class="grow-visual glass">
+              <canvas id="growCanvas"></canvas>
+              <div class="stage-label">stage: <b id="stageName">solo</b></div>
+            </div>
+            <div>
+              <span class="kicker">Solo &rarr; Team</span>
+              <h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.08;letter-spacing:-0.02em;">
+                One cluster becomes<br />a shared brain.
+              </h2>
+              <p style="margin-top:1rem;color:var(--ink-dim);font-size:1.05rem;">
+                Start with your own notes. As teammates and agents join, their
+                clusters connect — the knowledge graph grows denser and more
+                valuable with every link. Nothing siloed, nothing relearned.
+              </p>
+              <div class="stages" role="tablist" aria-label="Graph growth stages">
+                <button class="stage-pill active" data-stage="0">solo</button>
+                <button class="stage-pill" data-stage="1">team</button>
+                <button class="stage-pill" data-stage="2">org + agents</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINAL CTA -->
+      <section class="final">
+        <div class="final-card glass">
+          <h2>Give your agents a<br />place to <span style="color:var(--blue-bright);font-style:italic;">remember</span>.</h2>
+          <p>Open source. Self-host in minutes, or start free in the cloud.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="https://app.aveline.ai">Try it</a>
+            <a class="btn ghost" href="https://github.com/aveline-ai/aveline" target="_blank" rel="noopener">
+              Deploy it <span class="arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        Aveline — the agent-friendly wiki ·
+        <a href="https://github.com/aveline-ai/aveline" target="_blank" rel="noopener">github.com/aveline-ai</a>
+      </footer>
+    </div>
+
+    <script>
+      "use strict";
+
+      const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      /* ============================================================
+         HERO — living knowledge graph
+         Nodes = knowledge items, edges = @mention links.
+         Gentle sinusoidal orbital drift, cheap & 60fps.
+      ============================================================ */
+      (function () {
+        const canvas = document.getElementById("graph");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d", { alpha: true });
+
+        let DPR = 1, w = 0, h = 0, raf = 0, t = 0;
+        let scrollY = 0;
+        const mouse = { x: -9999, y: -9999, active: false };
+
+        // Real-feeling knowledge items. labeled ones carry names; pinned ones
+        // get a blue ring. The rest are anonymous knowledge nodes.
+        const NAMED = [
+          { l: "deploy-runbook", pin: true },
+          { l: "oncall", pin: false },
+          { l: "auth-flow", pin: true },
+          { l: "staging-creds", pin: false },
+          { l: "postmortem-2024", pin: false },
+          { l: "api-contract", pin: true },
+          { l: "infra-map", pin: false },
+          { l: "onboarding", pin: false },
+          { l: "incident-101", pin: false },
+          { l: "billing-spec", pin: false },
+        ];
+
+        let nodes = [], edges = [];
+        const MAX_EXTRA = 46; // cap node count for perf
+
+        function build() {
+          nodes = [];
+          edges = [];
+          // cluster centers — a few loose communities of knowledge
+          const clusters = [
+            { x: 0.30, y: 0.40 },
+            { x: 0.68, y: 0.34 },
+            { x: 0.50, y: 0.70 },
+            { x: 0.80, y: 0.66 },
+          ];
+
+          function mk(label, pin, cx, cy, spread) {
+            const a = Math.random() * Math.PI * 2;
+            const r = Math.random() * spread;
+            const n = {
+              hx: cx + Math.cos(a) * r,
+              hy: cy + Math.sin(a) * r,
+              x: 0, y: 0,
+              label: label || null,
+              pin: !!pin,
+              rad: label ? 4.4 : 2.2 + Math.random() * 1.6,
+              ph: Math.random() * Math.PI * 2,
+              amp: 8 + Math.random() * 16,
+              spd: 0.0006 + Math.random() * 0.0009,
+              glow: 0,
+            };
+            nodes.push(n);
+            return nodes.length - 1;
+          }
+
+          // named nodes seeded across clusters
+          NAMED.forEach((it, i) => {
+            const c = clusters[i % clusters.length];
+            mk(it.l, it.pin, c.x, c.y, 0.07);
+          });
+          // anonymous nodes filling out clusters
+          const extra = Math.min(MAX_EXTRA, Math.round((w * h) / 34000));
+          for (let i = 0; i < extra; i++) {
+            const c = clusters[i % clusters.length];
+            mk(null, false, c.x, c.y, 0.13);
+          }
+
+          // edges: connect each node to a couple of nearby nodes
+          for (let i = 0; i < nodes.length; i++) {
+            const a = nodes[i];
+            const cand = [];
+            for (let j = 0; j < nodes.length; j++) {
+              if (i === j) continue;
+              const dx = (a.hx - nodes[j].hx), dy = (a.hy - nodes[j].hy);
+              cand.push({ j, d: dx * dx + dy * dy });
+            }
+            cand.sort((p, q) => p.d - q.d);
+            const k = a.label ? 3 : 2;
+            for (let m = 0; m < k && m < cand.length; m++) {
+              const j = cand[m].j;
+              if (j > i) edges.push({ a: i, b: j, ph: Math.random() * Math.PI * 2 });
+            }
+          }
+        }
+
+        function resize() {
+          DPR = Math.min(window.devicePixelRatio || 1, 2);
+          w = window.innerWidth;
+          h = window.innerHeight;
+          canvas.width = w * DPR;
+          canvas.height = h * DPR;
+          canvas.style.width = w + "px";
+          canvas.style.height = h + "px";
+          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+          build();
+        }
+
+        // map normalized home coords -> pixels (with a little overscan so
+        // clusters bleed past the edges)
+        function px(nx) { return (-0.08 + nx * 1.16) * w; }
+        function py(ny) { return (-0.06 + ny * 1.12) * h; }
+
+        function positions(animate) {
+          const par = scrollY * 0.06; // subtle parallax drift up on scroll
+          for (const n of nodes) {
+            const bx = px(n.hx), by = py(n.hy) - par;
+            if (animate) {
+              n.x = bx + Math.cos(t * n.spd * 1000 + n.ph) * n.amp;
+              n.y = by + Math.sin(t * n.spd * 1300 + n.ph * 1.3) * n.amp * 0.8;
+            } else {
+              n.x = bx; n.y = by;
+            }
+            // mouse proximity → brighten + gentle repel-ish lift
+            let g = 0;
+            if (mouse.active) {
+              const dx = n.x - mouse.x, dy = n.y - mouse.y;
+              const d2 = dx * dx + dy * dy;
+              const R = 150;
+              if (d2 < R * R) {
+                const f = 1 - Math.sqrt(d2) / R;
+                g = f;
+                n.x += dx * f * 0.12;
+                n.y += dy * f * 0.12;
+              }
+            }
+            n.glow += (g - n.glow) * 0.15;
+          }
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, w, h);
+
+          // EDGES — faint glowing links
+          ctx.lineWidth = 1;
+          for (const e of edges) {
+            const a = nodes[e.a], b = nodes[e.b];
+            const lift = Math.max(a.glow, b.glow);
+            const base = 0.05 + (a.label || b.label ? 0.03 : 0);
+            const alpha = base + lift * 0.35;
+            const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+            grad.addColorStop(0, "rgba(79,142,247," + (alpha * (0.6 + a.glow)) + ")");
+            grad.addColorStop(1, "rgba(59,130,246," + (alpha * (0.6 + b.glow)) + ")");
+            ctx.strokeStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+
+          // a few traveling pulses along edges to feel "alive"
+          if (!REDUCE.matches) {
+            for (let i = 0; i < edges.length; i += 7) {
+              const e = edges[i];
+              const a = nodes[e.a], b = nodes[e.b];
+              const fp = (Math.sin(t * 0.0008 + e.ph) * 0.5 + 0.5);
+              const x = a.x + (b.x - a.x) * fp;
+              const y = a.y + (b.y - a.y) * fp;
+              ctx.fillStyle = "rgba(120,170,255,0.5)";
+              ctx.beginPath();
+              ctx.arc(x, y, 1.4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // NODES
+          ctx.font = "500 11px 'JetBrains Mono', monospace";
+          ctx.textBaseline = "middle";
+          for (const n of nodes) {
+            const r = n.rad * (1 + n.glow * 0.5);
+            const bright = 0.45 + n.glow * 0.55;
+
+            // glow halo for named / hovered nodes
+            if (n.label || n.glow > 0.05) {
+              const halo = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 5);
+              halo.addColorStop(0, "rgba(79,142,247," + (0.22 * bright) + ")");
+              halo.addColorStop(1, "rgba(79,142,247,0)");
+              ctx.fillStyle = halo;
+              ctx.beginPath();
+              ctx.arc(n.x, n.y, r * 5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // core
+            ctx.fillStyle = n.label
+              ? "rgba(173,201,255," + (0.7 + n.glow * 0.3) + ")"
+              : "rgba(110,140,200," + (0.4 + n.glow * 0.5) + ")";
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+            ctx.fill();
+
+            // pinned ring
+            if (n.pin) {
+              ctx.strokeStyle = "rgba(79,142,247," + (0.85) + ")";
+              ctx.lineWidth = 1.4;
+              ctx.beginPath();
+              ctx.arc(n.x, n.y, r + 3.5, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+
+            // label
+            if (n.label) {
+              const la = 0.5 + n.glow * 0.5;
+              ctx.fillStyle = "rgba(214,227,255," + la + ")";
+              ctx.fillText(n.label, n.x + r + 7, n.y + 0.5);
+            }
+          }
+        }
+
+        function frame(now) {
+          t = now;
+          positions(true);
+          draw();
+          raf = requestAnimationFrame(frame);
+        }
+
+        function start() {
+          if (raf) return;
+          raf = requestAnimationFrame(frame);
+        }
+        function stop() {
+          if (raf) cancelAnimationFrame(raf);
+          raf = 0;
+        }
+        function staticRender() {
+          positions(false);
+          draw();
+        }
+
+        function obey() {
+          stop();
+          if (REDUCE.matches) staticRender();
+          else start();
+        }
+
+        // events
+        let rt = 0;
+        window.addEventListener("resize", () => {
+          clearTimeout(rt);
+          rt = setTimeout(() => { resize(); obey(); }, 150);
+        });
+        window.addEventListener("scroll", () => {
+          scrollY = window.scrollY || window.pageYOffset;
+          if (REDUCE.matches) staticRender();
+        }, { passive: true });
+        window.addEventListener("pointermove", (e) => {
+          mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
+        }, { passive: true });
+        window.addEventListener("pointerleave", () => { mouse.active = false; });
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) stop();
+          else obey();
+        });
+        REDUCE.addEventListener && REDUCE.addEventListener("change", obey);
+
+        resize();
+        obey();
+      })();
+
+      /* ============================================================
+         SOLO → TEAM — a small graph that grows from one cluster
+         to many as you switch stages (or it auto-advances).
+      ============================================================ */
+      (function () {
+        const canvas = document.getElementById("growCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const stageName = document.getElementById("stageName");
+        const pills = Array.from(document.querySelectorAll(".stage-pill"));
+        const NAMES = ["solo", "team", "org + agents"];
+        const COUNTS = [7, 18, 40];
+
+        let DPR = 1, w = 0, h = 0, raf = 0, t = 0;
+        let stage = 0, visible = COUNTS[0];
+        let nodes = [];
+
+        function seed() {
+          nodes = [];
+          const total = COUNTS[COUNTS.length - 1];
+          // clusters appear progressively: stage 0 -> 1 cluster, etc.
+          const clusters = [
+            { x: 0.5, y: 0.5 }, { x: 0.28, y: 0.35 }, { x: 0.74, y: 0.40 },
+            { x: 0.40, y: 0.72 }, { x: 0.78, y: 0.70 },
+          ];
+          for (let i = 0; i < total; i++) {
+            const ci = i < 7 ? 0 : i < 18 ? (1 + (i % 2)) : (1 + (i % 4));
+            const c = clusters[ci];
+            const a = Math.random() * Math.PI * 2;
+            const r = Math.random() * 0.16;
+            nodes.push({
+              hx: c.x + Math.cos(a) * r,
+              hy: c.y + Math.sin(a) * r,
+              ci,
+              ph: Math.random() * Math.PI * 2,
+              amp: 4 + Math.random() * 7,
+              spd: 0.0007 + Math.random() * 0.0009,
+              rad: 2 + Math.random() * 2,
+              pin: i % 9 === 0,
+              op: 0,
+            });
+          }
+        }
+
+        function resize() {
+          DPR = Math.min(window.devicePixelRatio || 1, 2);
+          const rect = canvas.getBoundingClientRect();
+          w = rect.width; h = rect.height;
+          canvas.width = w * DPR;
+          canvas.height = h * DPR;
+          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        }
+
+        function setStage(s) {
+          stage = s;
+          visible = COUNTS[s];
+          stageName.textContent = NAMES[s];
+          pills.forEach((p, i) => p.classList.toggle("active", i === s));
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, w, h);
+          const par = REDUCE.matches ? 0 : t;
+
+          // fade nodes in/out toward target visibility
+          for (let i = 0; i < nodes.length; i++) {
+            const target = i < visible ? 1 : 0;
+            nodes[i].op += (target - nodes[i].op) * 0.06;
+            const n = nodes[i];
+            n.x = n.hx * w + (REDUCE.matches ? 0 : Math.cos(par * n.spd * 1000 + n.ph) * n.amp);
+            n.y = n.hy * h + (REDUCE.matches ? 0 : Math.sin(par * n.spd * 1100 + n.ph) * n.amp * 0.8);
+          }
+
+          // edges within same cluster
+          ctx.lineWidth = 1;
+          for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].op < 0.05) continue;
+            for (let j = i + 1; j < nodes.length; j++) {
+              if (nodes[j].op < 0.05) continue;
+              if (nodes[i].ci !== nodes[j].ci) continue;
+              const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+              const d = Math.sqrt(dx * dx + dy * dy);
+              if (d < w * 0.22) {
+                const a = (1 - d / (w * 0.22)) * 0.4 * Math.min(nodes[i].op, nodes[j].op);
+                ctx.strokeStyle = "rgba(79,142,247," + a + ")";
+                ctx.beginPath();
+                ctx.moveTo(nodes[i].x, nodes[i].y);
+                ctx.lineTo(nodes[j].x, nodes[j].y);
+                ctx.stroke();
+              }
+            }
+          }
+          // inter-cluster bridges (only when team+)
+          if (visible > 7) {
+            ctx.strokeStyle = "rgba(110,150,230,0.16)";
+            for (let i = 0; i < nodes.length; i += 5) {
+              const a = nodes[i], b = nodes[(i + 7) % nodes.length];
+              if (a.op < 0.3 || b.op < 0.3 || a.ci === b.ci) continue;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+
+          // nodes
+          for (const n of nodes) {
+            if (n.op < 0.02) continue;
+            ctx.fillStyle = "rgba(150,180,250," + (0.7 * n.op) + ")";
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, n.rad, 0, Math.PI * 2);
+            ctx.fill();
+            if (n.pin) {
+              ctx.strokeStyle = "rgba(79,142,247," + (0.8 * n.op) + ")";
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.arc(n.x, n.y, n.rad + 3, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+          }
+        }
+
+        function frame(now) {
+          t = now;
+          draw();
+          raf = requestAnimationFrame(frame);
+        }
+        function start() { if (!raf) raf = requestAnimationFrame(frame); }
+        function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+
+        // auto-advance stages when visible, unless reduced motion
+        let auto = 0;
+        function startAuto() {
+          stopAuto();
+          if (REDUCE.matches) return;
+          auto = setInterval(() => setStage((stage + 1) % 3), 3600);
+        }
+        function stopAuto() { if (auto) clearInterval(auto); auto = 0; }
+
+        pills.forEach((p) =>
+          p.addEventListener("click", () => {
+            setStage(parseInt(p.dataset.stage, 10));
+            startAuto(); // reset timer on manual interaction
+          })
+        );
+
+        let rt = 0;
+        window.addEventListener("resize", () => {
+          clearTimeout(rt);
+          rt = setTimeout(resize, 150);
+        });
+
+        // only animate when scrolled into view
+        const io = new IntersectionObserver((ents) => {
+          ents.forEach((en) => {
+            if (en.isIntersecting && !document.hidden) {
+              if (REDUCE.matches) { setStage(2); draw(); }
+              else { start(); startAuto(); }
+            } else {
+              stop(); stopAuto();
+            }
+          });
+        }, { threshold: 0.2 });
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) { stop(); stopAuto(); }
+        });
+
+        resize();
+        seed();
+        setStage(0);
+        if (REDUCE.matches) { setStage(2); draw(); }
+        else io.observe(canvas);
+      })();
+    </script>
+  </body>
+</html>

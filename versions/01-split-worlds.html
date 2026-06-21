@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aveline · the agent-friendly wiki</title>
+    <title>Aveline — the agent-friendly wiki</title>
     <meta
       name="description"
-      content="An open-source, agent-friendly wiki: a clean read for humans, an API for agents."
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
     />
 
     <!-- Open Graph (Slack, Facebook, LinkedIn, iMessage) -->
@@ -16,21 +16,21 @@
     <meta property="og:title" content="The agent-friendly wiki" />
     <meta
       property="og:description"
-      content="An open-source, agent-friendly wiki: a clean read for humans, an API for agents."
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
     />
     <meta property="og:image" content="https://aveline.ai/og.png" />
     <meta property="og:image:secure_url" content="https://aveline.ai/og.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Aveline · the agent-friendly wiki" />
+    <meta property="og:image:alt" content="Aveline — the agent-friendly wiki" />
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="The agent-friendly wiki" />
     <meta
       name="twitter:description"
-      content="An open-source, agent-friendly wiki: a clean read for humans, an API for agents."
+      content="An open-source, agent-friendly wiki — a clean read for humans, an API for agents."
     />
     <meta name="twitter:image" content="https://aveline.ai/og.png" />
 
@@ -81,32 +81,7 @@
         grid-template-columns: 1fr 1fr;
         height: 100vh;
         height: 100dvh;
-        width: 100%;
-      }
-
-      /* the two worlds merge: fade both panes into the body surface at the
-         hero's base, so the story flows out of one continuous color */
-      .split::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 34vh;
-        z-index: 4;
-        pointer-events: none;
-        /* hold the panes crisp up top, then ease down through a WARM dark
-           midtone (so the beige pane dims into night instead of muddy grey),
-           landing on solid body-black well before the story starts */
-        background: linear-gradient(
-          to bottom,
-          rgba(8, 8, 10, 0) 0%,
-          rgba(8, 8, 10, 0) 24%,
-          rgba(24, 18, 13, 0.45) 50%,
-          rgba(11, 10, 11, 0.9) 78%,
-          #08080a 92%,
-          #08080a 100%
-        );
+        width: 100vw;
       }
 
       .pane {
@@ -363,10 +338,13 @@
         top: 50%; /* line up with the two headlines' vertical center */
         transform: translate(-50%, -50%);
         z-index: 6;
-        /* a single button, centered on the seam */
-        display: flex;
-        justify-content: center;
+        /* equal halves so the gap between the buttons lands exactly on
+           the page's center seam, no matter the buttons' own widths */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         align-items: center;
+        column-gap: 2.2rem;
+        width: min(880px, 94vw);
         animation: cta-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
       }
 
@@ -499,14 +477,28 @@
         transform: translateY(-1px);
       }
 
-      /* Medium screens (laptops): drop the button to the lower-center so it
-         sits clear of the headlines. */
+      /* ────────────────────────────────────────────────────────────
+         Medium screens (tablets / laptops) — panes are still side-by-side,
+         but narrow enough that two buttons on the seam would crowd the
+         headlines. Keep the CTA fixed and centered on the seam, but stack
+         the buttons vertically and sit them in the lower-center, clear of
+         the headlines.
+      ──────────────────────────────────────────────────────────── */
+
       @media (min-width: 721px) and (max-width: 1900px) {
         .cta {
           top: auto;
           bottom: 7vh;
           transform: translateX(-50%);
           animation: none;
+          width: auto;
+          grid-template-columns: minmax(0, 300px);
+          justify-content: center;
+          column-gap: 0;
+          row-gap: 0.85rem;
+        }
+        .cta-btn {
+          justify-self: stretch;
         }
       }
 
@@ -522,21 +514,15 @@
         }
 
         .split {
-          display: flex;
-          flex-direction: column;
+          grid-template-columns: 1fr;
+          height: auto;
           min-height: 100vh;
           min-height: 100dvh;
         }
 
-        /* the desktop merge-fade is only for the side-by-side hero; on mobile
-           the dark agent strip already meets the dark story below it */
-        .split::after {
-          display: none;
-        }
-
         .pane {
-          flex: 1;
-          min-height: 0;
+          min-height: 50vh;
+          min-height: 50dvh;
           padding: 4rem 1.5rem;
           /* stack as a column so content left-aligns to the padding edge
              (instead of shrink-wrapping and centering) — shares a left
@@ -603,15 +589,15 @@
           justify-content: flex-end;
           padding-bottom: 1.5rem;
         }
-        /* The agent side is a compact strip (~30%) that keeps its own
-           headline ("a wiki it can easily maintain"). It differs from the
-           human side now, so the full thesis still reads on mobile. The human
-           pane takes the rest of the screen. */
+        /* Agent label hugs the CTA band from below, mirroring "For humans"
+           above it. The headline is dropped on mobile (it just repeats the
+           human one) — leaving the label sitting in the trippy matrix bg. */
         .pane.agent {
-          flex: 0 0 auto;
-          min-height: 30dvh;
           justify-content: flex-start;
           padding-top: 1.5rem;
+        }
+        .pane.agent h1 {
+          display: none;
         }
 
         .cta {
@@ -697,10 +683,10 @@
         z-index: 0;
         pointer-events: none;
         background-image: linear-gradient(
-            rgba(59, 130, 246, 0.11) 1px,
+            rgba(59, 130, 246, 0.06) 1px,
             transparent 1px
           ),
-          linear-gradient(90deg, rgba(59, 130, 246, 0.11) 1px, transparent 1px);
+          linear-gradient(90deg, rgba(59, 130, 246, 0.06) 1px, transparent 1px);
         background-size: 46px 46px;
         -webkit-mask-image: radial-gradient(
           ellipse 72% 62% at 50% 45%,
@@ -739,6 +725,34 @@
         box-shadow: 0 0 16px rgba(59, 130, 246, 0.75);
       }
 
+      .kicker {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1.5rem;
+      }
+      .kicker::before {
+        content: "";
+        width: 24px;
+        height: 1.5px;
+      }
+      .band.human .kicker {
+        color: rgba(26, 20, 16, 0.6);
+      }
+      .band.human .kicker::before {
+        background: rgba(26, 20, 16, 0.45);
+      }
+      .band.agent .kicker {
+        color: rgba(232, 232, 232, 0.62);
+      }
+      .band.agent .kicker::before {
+        background: #3b82f6;
+      }
 
       .band h2 {
         font-family: "Fraunces", "Inter", serif;
@@ -870,68 +884,6 @@
         gap: clamp(1.2rem, 2.4vw, 2rem);
         margin-top: clamp(2.6rem, 5vh, 4rem);
       }
-      .duo {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: clamp(1.2rem, 2.4vw, 2rem);
-        margin-top: clamp(2.6rem, 5vh, 4rem);
-      }
-
-      /* value props strung along a single blue spine on the left, content to
-         its right (continues the seam motif as a vertical timeline) */
-      .spine {
-        position: relative;
-        max-width: 460px;
-        margin: clamp(2.6rem, 5vh, 4rem) auto 0;
-        padding: 0.3rem 0;
-        text-align: left;
-      }
-      .spine::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 5px;
-        width: 2px;
-        background: linear-gradient(
-          to bottom,
-          rgba(59, 130, 246, 0) 0%,
-          rgba(59, 130, 246, 0.45) 7%,
-          rgba(59, 130, 246, 0.45) 93%,
-          rgba(59, 130, 246, 0) 100%
-        );
-      }
-      .spine-item {
-        position: relative;
-        padding: 0 0 clamp(1.8rem, 3.6vh, 2.6rem) 2.6rem;
-      }
-      .spine-item:last-child {
-        padding-bottom: 0;
-      }
-      .spine-node {
-        position: absolute;
-        left: 0;
-        top: 0.4rem;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #3b82f6;
-        box-shadow: 0 0 0 5px #08080a, 0 0 16px rgba(59, 130, 246, 0.7);
-      }
-      .spine-item h3 {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 1.34rem;
-        letter-spacing: -0.015em;
-        color: #f5f5f5;
-        margin-bottom: 0.4rem;
-      }
-      .spine-item p {
-        font-size: 0.96rem;
-        line-height: 1.55;
-        color: rgba(232, 232, 232, 0.66);
-        margin: 0;
-      }
       .cell {
         position: relative;
         padding: 1.7rem 1.6rem;
@@ -1057,6 +1009,9 @@
         margin-left: auto;
         margin-right: auto;
       }
+      .band.center .kicker {
+        justify-content: center;
+      }
       .band.center .cta-inline {
         justify-content: center;
       }
@@ -1144,8 +1099,7 @@
           grid-template-columns: 1fr;
           gap: 2.4rem;
         }
-        .trio,
-        .duo {
+        .trio {
           grid-template-columns: 1fr;
         }
       }
@@ -1168,51 +1122,6 @@
           transform: none;
           transition: none;
         }
-      }
-      /* ── Agent terminal: a human asks, Claude searches via aveline ── */
-      .term-body .ln {
-        display: block;
-      }
-      .term-body .ln + .ln {
-        margin-top: 0.5rem;
-      }
-      /* the human's question — shell-style ">" prompt, bright text */
-      .term-body .ln.ask {
-        color: #f5f5f5;
-      }
-      .term-body .ln.ask .pfx {
-        color: #6ee7a0;
-      }
-      /* claude reaching for aveline */
-      .term-body .who {
-        color: rgba(232, 232, 232, 0.5);
-        font-weight: 600;
-      }
-      .term-body .ln.call .cmd {
-        color: #4f8ef7;
-      }
-      /* what aveline returns */
-      .term-body .ln.res {
-        color: rgba(232, 232, 232, 0.5);
-      }
-      /* claude's answer — the payoff */
-      .term-body .ln.answer {
-        margin-top: 0.7rem;
-        color: rgba(245, 245, 245, 0.92);
-      }
-      .term-body .ln.res b,
-      .term-body .ln.answer b {
-        color: #4f8ef7;
-        font-weight: 500;
-      }
-      .term-body.is-anim .ln {
-        opacity: 0;
-        transform: translateY(5px);
-        transition: opacity 0.45s ease, transform 0.45s ease;
-      }
-      .term-body.is-anim .ln.show {
-        opacity: 1;
-        transform: none;
       }
     </style>
   </head>
@@ -1241,7 +1150,7 @@
         </div>
         <div class="content">
           <div class="pane-label">For humans</div>
-          <h1>A wiki <span class="you">you</span> can<br />easily understand</h1>
+          <h1>A wiki <span class="you">you</span> can<br />easily understand.</h1>
         </div>
       </section>
 
@@ -1251,7 +1160,10 @@
            between the stacked panes — no overlap with pane content.
              .try    → app  ·  .deploy → GitHub repo -->
       <nav class="cta" aria-label="Get started">
-        <a class="cta-btn try" href="https://app.aveline.ai">Get started</a>
+        <a class="cta-btn try" href="https://app.aveline.ai">Try it</a>
+        <a class="cta-btn deploy" href="https://github.com/aveline-ai/aveline" target="_blank" rel="noopener">
+          Deploy it<span class="arrow" aria-hidden="true">↗</span>
+        </a>
       </nav>
 
       <!-- RIGHT: agent / api -->
@@ -1267,7 +1179,7 @@
         </a>
         <div class="content">
           <div class="pane-label">For agents</div>
-          <h1>A wiki <span class="you">it</span> can<br />easily maintain</h1>
+          <h1>A wiki <span class="you">it</span> can<br />easily understand.</h1>
         </div>
       </section>
 
@@ -1280,18 +1192,20 @@
     <!-- ══ SCROLL STORY ══════════════════════════════════════════ -->
     <main class="story">
       <!-- THE PROBLEM — parchment -->
-      <section class="band agent">
+      <section class="band human">
         <span class="seam" aria-hidden="true"></span>
         <div class="band-inner">
           <div class="row2">
             <div class="copy">
+              <span class="kicker" data-reveal>The problem</span>
               <h2 data-reveal style="--d: 1">
-                Every wiki you've had quietly <span class="hl">went stale</span>
+                Every wiki you've had quietly <span class="hl">went stale</span>.
               </h2>
               <p class="lede" data-reveal style="--d: 2">
                 It always starts tidy. Then the work moves on, and nobody
-                goes back to fix the page. Six months later, no one knows
-                which docs to trust.
+                goes back to fix the page. Six months later the docs are
+                lying to you — so you stop trusting them, so you stop
+                writing them. Same quiet death, every time.
               </p>
             </div>
             <div class="visual" data-reveal style="--d: 2">
@@ -1310,68 +1224,133 @@
         </div>
       </section>
 
-      <!-- THE REALITY — the pivot: agents are already in the work, but the
-           wiki wasn't built for them. Hands off to "built for agents". -->
+      <!-- WHAT CHANGED — void, centered -->
       <section class="band agent center">
         <span class="seam" aria-hidden="true"></span>
         <div class="band-inner">
+          <span class="kicker" data-reveal>What changed</span>
           <h2 data-reveal style="--d: 1">
-            You already do all your work with <span class="hl">agents</span>
+            Your work already runs through an <span class="hl">agent</span>.
           </h2>
           <p class="lede" data-reveal style="--d: 2">
-            But your wiki wasn't built for them. A bolted-on MCP doesn't give
-            your agents the tools, or you the confidence.
+            So stop hand-writing the docs. The agent that did the work
+            writes down what it learned, as it goes. You read it. You keep
+            the parts that matter. The notes stay alive because keeping
+            them alive is finally part of the work — not a chore bolted on
+            after.
           </p>
+          <div class="term" data-reveal style="--d: 3">
+            <div class="term-bar">
+              <i></i><i></i><i></i><span>~/work</span>
+            </div>
+            <div class="term-body">
+              <span
+                ><span class="pfx">›</span> <span class="cmd">aveline save</span>
+                <span class="arg">--pin --title "staging deploy"</span></span
+              >
+              <span class="out"
+                >saved · <b>owned by you</b> · pinned to workspace memory</span
+              >
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- THE VALUE PROP · built for humans and agents (the whole pitch) -->
-      <section class="band agent center">
+      <!-- HOW IT WORKS — parchment, three steps -->
+      <section class="band human">
         <span class="seam" aria-hidden="true"></span>
         <div class="band-inner">
-          <h2 data-reveal style="--d: 1; max-width: none; text-wrap: balance">
-            Aveline is the wiki designed for<br /><span class="hl">humans and agents</span>
+          <span class="kicker" data-reveal>How it works</span>
+          <h2 data-reveal style="--d: 1">
+            Written once, while you work. <span class="hl">Read back</span>
+            every session.
           </h2>
-          <p class="lede" data-reveal style="--d: 2">
-            Nothing happens off the record, so you can hand your agents the
-            keys with confidence and get to building.
-          </p>
-          <div class="spine">
-            <div class="spine-item" data-reveal style="--d: 1">
-              <span class="spine-node" aria-hidden="true"></span>
-              <h3>Your agents write the docs</h3>
+          <div class="trio">
+            <div class="cell" data-reveal style="--d: 1">
+              <span class="cell-num">01 · capture</span>
+              <h3>It writes as it goes</h3>
               <p>
-                They already have the context, from your conversations and
-                your codebase. Documentation gets written and kept current as
-                part of the work, not after it.
+                When your agent figures something out, it saves it with one
+                line — <code>aveline save</code>. No blank page, no
+                context-switch.
               </p>
             </div>
-            <div class="spine-item" data-reveal style="--d: 2">
-              <span class="spine-node" aria-hidden="true"></span>
-              <h3>Every change is on the record</h3>
+            <div class="cell" data-reveal style="--d: 2">
+              <span class="cell-num">02 · curate</span>
+              <h3>You keep what matters</h3>
               <p>
-                Full version history, with a reason on every edit. Roll back
-                to any version to see exactly what changed, and why.
+                Pin the notes worth remembering. Pinned notes are your real
+                memory; everything else is a searchable scratchpad.
               </p>
             </div>
-            <div class="spine-item" data-reveal style="--d: 3">
-              <span class="spine-node" aria-hidden="true"></span>
-              <h3>Comments stay in sync</h3>
+            <div class="cell" data-reveal style="--d: 3">
+              <span class="cell-num">03 · recall</span>
+              <h3>It starts already knowing</h3>
               <p>
-                When an agent changes a doc, it resolves or moves the comments
-                on it. Discussions never drift from the content.
-              </p>
-            </div>
-            <div class="spine-item" data-reveal style="--d: 4">
-              <span class="spine-node" aria-hidden="true"></span>
-              <h3>Your agents read them back to you</h3>
-              <p>
-                Ask a question in your chat and get the answer straight from
-                your wiki. Open it in the browser anytime you want the full
-                page.
+                Next session, the pinned notes load straight back into your
+                agent. No re-explaining what it should already know.
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- WHY YOU'LL TRUST IT — void, three tenets -->
+      <section class="band agent">
+        <span class="seam" aria-hidden="true"></span>
+        <div class="band-inner">
+          <span class="kicker" data-reveal>Why you'll trust it</span>
+          <h2 data-reveal style="--d: 1">
+            Knowledge that admits when it's <span class="hl">wrong</span>.
+          </h2>
+          <p class="lede" data-reveal style="--d: 2">
+            A wiki is only worth reading if you believe it. So every fact
+            carries the things that make it believable.
+          </p>
+          <div class="trio">
+            <div class="cell" data-reveal style="--d: 1">
+              <span class="cell-num">owner</span>
+              <h3>Every fact has a name on it</h3>
+              <p>
+                Someone owns it and answers for it. Not "the team wrote
+                this" — a person.
+              </p>
+            </div>
+            <div class="cell" data-reveal style="--d: 2">
+              <span class="cell-num">history</span>
+              <h3>Every change is on the record</h3>
+              <p>
+                Who wrote what, when, and where it came from. Nothing
+                appears from nowhere; nothing changes in the dark.
+              </p>
+            </div>
+            <div class="cell" data-reveal style="--d: 3">
+              <span class="cell-num">flag</span>
+              <h3>Stale facts get called out</h3>
+              <p>
+                Anyone — even an agent a wrong fact just burned — can flag
+                it. The owner verifies, fixes, or retires it.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SOLO → POD — parchment, centered -->
+      <section class="band human center">
+        <span class="seam" aria-hidden="true"></span>
+        <div class="band-inner">
+          <span class="kicker" data-reveal>Starts with you</span>
+          <h2 data-reveal style="--d: 1">
+            Good on your own. <span class="hl">Better</span> with your team.
+          </h2>
+          <p class="lede" data-reveal style="--d: 2">
+            Begin solo — it's the memory your agent has been missing
+            between sessions. When it has earned its place, invite your
+            team into the same workspace. Same notes, now shared. Mentions,
+            threads and ownership come alive. Nothing about how it works
+            changes.
+          </p>
         </div>
       </section>
 
@@ -1379,15 +1358,24 @@
       <section class="band agent center" id="get-started">
         <span class="seam" aria-hidden="true"></span>
         <div class="band-inner">
+          <span class="kicker" data-reveal>Open source</span>
           <h2 data-reveal style="--d: 1">
-            Yours, down to the <span class="hl">source</span>
+            Yours to read, run, and <span class="hl">keep</span>.
           </h2>
           <p class="lede" data-reveal style="--d: 2">
-            Read the code, run it on your own box, or let us host it. Your
-            team's knowledge is too important to rent.
+            Your team's knowledge is too important to rent. Aveline is open
+            source and self-hostable — read the code, run it on your own
+            box, or let us host it for you.
           </p>
           <div class="cta-inline" data-reveal style="--d: 3">
-            <a class="cta-btn try" href="https://app.aveline.ai">Get started</a>
+            <a class="cta-btn try" href="https://app.aveline.ai">Try it</a>
+            <a
+              class="cta-btn deploy"
+              href="https://github.com/aveline-ai/aveline"
+              target="_blank"
+              rel="noopener"
+              >Deploy it<span class="arrow" aria-hidden="true">↗</span></a
+            >
           </div>
         </div>
       </section>
@@ -1651,71 +1639,6 @@
             { passive: true }
           );
         }
-      })();
-
-      /* ============================================================
-         AGENT TERMINAL — Claude recalling + saving via aveline, looped
-      ============================================================ */
-      (function () {
-        const term = document.getElementById("agentTerm");
-        if (!term) return;
-        const lines = Array.from(term.querySelectorAll(".ln"));
-        const reduced = window.matchMedia(
-          "(prefers-reduced-motion: reduce)"
-        ).matches;
-        if (reduced || !lines.length) return; // leave fully shown, no loop
-
-        term.classList.add("is-anim");
-        let timers = [];
-        let running = false;
-
-        function clear() {
-          timers.forEach(clearTimeout);
-          timers = [];
-        }
-        function play() {
-          lines.forEach((l) => l.classList.remove("show"));
-          const step = 760;
-          lines.forEach((l, i) => {
-            timers.push(
-              setTimeout(() => l.classList.add("show"), 300 + i * step)
-            );
-          });
-          timers.push(setTimeout(play, 300 + lines.length * step + 2800));
-        }
-        function start() {
-          if (running) return;
-          running = true;
-          play();
-        }
-        function stop() {
-          running = false;
-          clear();
-        }
-
-        if ("IntersectionObserver" in window) {
-          const io = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((e) => {
-                if (e.isIntersecting) start();
-                else stop();
-              });
-            },
-            { threshold: 0.3 }
-          );
-          io.observe(term);
-        } else {
-          start();
-        }
-
-        document.addEventListener("visibilitychange", () => {
-          if (document.hidden) {
-            stop();
-            return;
-          }
-          const r = term.getBoundingClientRect();
-          if (r.top < window.innerHeight && r.bottom > 0) start();
-        });
       })();
     </script>
   </body>
